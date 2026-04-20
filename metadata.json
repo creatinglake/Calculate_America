@@ -1,0 +1,5 @@
+{
+  "name": "FairShare: Income Inequality Explorer",
+  "description": "Visualize US income inequality, compare historical distributions, and calculate your potential income in a fairer economy.",
+  "requestFramePermissions": []
+}
