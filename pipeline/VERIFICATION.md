@@ -7,12 +7,10 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 ---
 
 ## Open items (as of 2026-10-21)
-Resolved since this list was started: NIPA factor (V15), AS files (V11), DFA format and latest quarter (V13), latest `hweal` year (V14), PSZ effective tax rates (V16), 1928 top shares (presets.json, built and validated), AGI (V17).
-- CPS regression test and the 1963 weighted-total check (about 60M, against IPUMS sample notes). Adam supplied the spreadsheet on 2026-10-21 (`pipeline/raw/inputs/`, never committed: IPUMS microdata).
-- Tax Foundation historical brackets: Adam supplied `Historical Income Tax Rates and Brackets, 1862-2025.csv` on 2026-10-21; still to ingest and cross-check against IRS (Phase 6).
-- WID license (V8): Adam confirmed on 2026-10-21 that the site is non-commercial (no ads). CC BY-NC-SA 4.0 is acceptable; derived data files must carry the same license and attribution.
-- Current-law 2025/2026 federal brackets from IRS (Phase 6).
-- DFA and BEA reuse terms.
+Resolved: NIPA factor (V15), AS files (V11), DFA format and latest quarter (V13), latest `hweal` year (V14), PSZ effective tax rates (V16), 1928 top shares (presets.json), AGI (V17), CPS regression test (V18), historical brackets for 1953/1963/1980 (V19), WID license accepted (V8: site is non-commercial).
+- **Ask Adam:** IPUMS CPS extract details: version (for the citation), whether 1963 weights include IPUMS's 1.3262 adjustment, and which records were dropped (V18).
+- Current-law 2025/2026 federal brackets and standard deductions from IRS; historical standard deductions (Phase 6).
+- Reuse terms for DFA, BEA, IRS and Tax Foundation data.
 - Spot check of the site's 1963 and 2023 top 1% / bottom 50% against WID's own website (before launch).
 - Norton and Ariely 2011 quintile figures (wealth mode, Phase 7).
 
