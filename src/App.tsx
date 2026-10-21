@@ -6,6 +6,7 @@ import { Top } from './pages/Top';
 import { Taxes } from './pages/Taxes';
 
 const NAV = ['/', '/explore/', '/top/', '/taxes/', '/methods/', '/sources/', '/about/'] as const;
+const NAV_LABEL: Record<string, string> = { '/explore/': 'Calculator', '/top/': 'The top' };
 
 // Pages other than the calculator are placeholders until their phases.
 export function App() {
@@ -33,7 +34,7 @@ export function App() {
                 const r = ROUTES.find((x) => x.path === p)!;
                 return (
                   <li key={p}>
-                    <Link href={p} aria-current={r === route ? 'page' : undefined}>{p === '/explore/' ? 'Calculator' : r.title}</Link>
+                    <Link href={p} aria-current={r === route ? 'page' : undefined}>{NAV_LABEL[p] ?? r.title}</Link>
                   </li>
                 );
               })}
