@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { ROUTES } from '../src/routes.ts';
 
 const HEADINGS: Record<string, string> = {
+  '/': 'How America divides its income, and what your share would be if it were divided differently',
   '/explore/': 'Same size economy, divided another way',
   '/top/': 'Ten times smaller, again and again',
   '/taxes/': "Today's incomes, taxed another way",

@@ -8,6 +8,7 @@ import { Wealth } from './pages/Wealth';
 import { Sources } from './pages/Sources';
 import { About } from './pages/About';
 import { Ethics } from './pages/Ethics';
+import { Story } from './pages/Story';
 
 // The logo links to the story at /.
 const NAV = ['/explore/', '/top/', '/taxes/', '/wealth/', '/methods/', '/sources/', '/about/'] as const;
@@ -51,7 +52,9 @@ export function App() {
         </div>
       </header>
       <main className="page">
-        {route?.path === '/explore/' ? (
+        {route?.path === '/' ? (
+          <Story />
+        ) : route?.path === '/explore/' ? (
           <Explore />
         ) : route?.path === '/top/' ? (
           <Top />
