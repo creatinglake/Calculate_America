@@ -12,6 +12,7 @@ import { CareerWealth } from '../components/CareerWealth';
 import { PeopleIncomeBars } from '../charts/PeopleIncomeBars';
 import { ShareHistory } from '../charts/ShareHistory';
 import { DfaHistory } from '../charts/DfaHistory';
+import { ZoomGrid } from '../charts/ZoomGrid';
 import { Link } from '../app/router';
 import { money, moneyDiff, pct } from '../ui/format';
 
@@ -215,6 +216,10 @@ export function Wealth() {
               </p>
             </section>
           )}
+          <section className="card" aria-labelledby={`${id}-zoom`}>
+            <h2 id={`${id}-zoom`} className="card-title">Wealth at the top, up close</h2>
+            <ZoomGrid Q={T.Q} adults={data.ptinc.adults![String(year)] ?? data.ptinc.adults![String(Math.max(...data.ptinc.years))]!} year={year} wealth />
+          </section>
           <ShareHistory file={data.hweal} noun="wealth" label="net personal wealth, adults" other={null} otherLabel="" />
           <DfaHistory data={data.dfa} />
         </div>

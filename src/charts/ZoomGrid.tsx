@@ -18,7 +18,8 @@ function hoursText(h: number): string {
   return `${Math.max(1, Math.round(h * 60))} minutes`;
 }
 
-export function ZoomGrid({ Q, adults, year }: { Q: QuantileFn; adults: number; year: number }) {
+export function ZoomGrid({ Q, adults, year, wealth = false }: { Q: QuantileFn; adults: number; year: number; wealth?: boolean }) {
+  const noun = wealth ? 'wealth' : 'income';
   const id = useId();
   const [level, setLevel] = useState(0);
   const [selected, setSelected] = useState(99);
@@ -95,9 +96,9 @@ export function ZoomGrid({ Q, adults, year }: { Q: QuantileFn; adults: number; y
           <p className="kpi"><span className="kpi-num">{money(cell.average)}</span><span className="kpi-unit">average</span></p>
           <dl className="zoom-facts">
             <div><dt>People in this square</dt><dd>about {people(cell.people)}</dd></div>
-            <div><dt>Income to get in</dt><dd>{money(cell.threshold)}</dd></div>
-            <div><dt>Times the median income</dt><dd>{cell.multipleOfMedian >= 10 ? Math.round(cell.multipleOfMedian).toLocaleString('en-US') : cell.multipleOfMedian.toFixed(1)}</dd></div>
-            <div><dt>Receives the median's yearly income in</dt><dd>{hoursText(cell.hoursToEarnMedian)}</dd></div>
+            <div><dt>{wealth ? 'Net worth' : 'Income'} to get in</dt><dd>{money(cell.threshold)}</dd></div>
+            <div><dt>Times the median {noun}</dt><dd>{cell.multipleOfMedian >= 10 ? Math.round(cell.multipleOfMedian).toLocaleString('en-US') : cell.multipleOfMedian.toFixed(1)}</dd></div>
+            {!wealth && <div><dt>Receives the median's yearly income in</dt><dd>{hoursText(cell.hoursToEarnMedian)}</dd></div>}
             <div><dt>Group</dt><dd>{GROUP_LABEL[groupOf(cell.p0)]}</dd></div>
           </dl>
           <div className="zoom-actions">
@@ -110,13 +111,13 @@ export function ZoomGrid({ Q, adults, year }: { Q: QuantileFn; adults: number; y
             )}
           </div>
           <p className="fine" id={`${id}-help`}>
-            Use the arrow keys to move between squares. Hours count every hour of the year. {year} dollars, before taxes.
+            Use the arrow keys to move between squares.{wealth ? ` Net worth per adult, ${year} dollars.` : ` Hours count every hour of the year. ${year} dollars, before taxes.`}
           </p>
         </div>
       </div>
       <p className="fine">
         This level as a whole: average {money(s.average)}, {s.multipleOfMedian >= 10 ? Math.round(s.multipleOfMedian).toLocaleString('en-US') : s.multipleOfMedian.toFixed(1)} times
-        the median ({money(s.median)}); receives the median's yearly income every {hoursText(s.hoursToEarnMedian)}.
+        the median ({money(s.median)}){wealth ? '.' : <>; receives the median's yearly income every {hoursText(s.hoursToEarnMedian)}.</>}
       </p>
     </div>
   );
