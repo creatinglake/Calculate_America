@@ -1,0 +1,26 @@
+{
+  "_note": "Transcribed from IRS documents; see VERIFICATION.md V21. Amounts in current dollars of each year.",
+  "currentLaw": {
+    "year": 2026,
+    "source": "IRS Rev. Proc. 2025-32, sections 3.01 (Tables 1 and 3) and 3.14; https://www.irs.gov/pub/irs-drop/rp-25-32.pdf",
+    "single": [[0.10, 0], [0.12, 12400], [0.22, 50400], [0.24, 105700], [0.32, 201775], [0.35, 256225], [0.37, 640600]],
+    "mfj": [[0.10, 0], [0.12, 24800], [0.22, 100800], [0.24, 211400], [0.32, 403550], [0.35, 512450], [0.37, 768700]],
+    "standardDeduction": { "single": 16100, "mfj": 32200 },
+    "exemption": { "single": 0, "mfj": 0 },
+    "exemptionSource": "IRS Publication 15-T (2026): withholding reflects the permanent termination of personal exemptions (P.L. 119-21)."
+  },
+  "deductions": {
+    "1953": {
+      "rule": "percentOfAgiCapped", "percent": 0.10, "cap": { "single": 1000, "mfj": 1000 },
+      "source": "Statistics of Income 1953 Part 1 (https://www.irs.gov/pub/irs-soi/53soireppt1ar.pdf): optional standard deduction, the smaller of $1,000 or 10 percent of adjusted gross income ($500 for a married person filing separately)."
+    },
+    "1963": {
+      "rule": "percentOfAgiCapped", "percent": 0.10, "cap": { "single": 1000, "mfj": 1000 },
+      "source": "Statistics of Income 1963 (https://www.irs.gov/pub/irs-soi/63inar.pdf): 10 percent of income as standard deduction, limited to $1,000 or $500 on a separate return of husband or wife; $600 per exemption."
+    },
+    "1980": {
+      "rule": "zeroBracketBuiltIn", "zeroBracket": { "single": 2300, "mfj": 3400 },
+      "source": "Statistics of Income 1980 (https://www.irs.gov/pub/irs-soi/80inar.pdf): zero bracket amount $3,400 married filing jointly, $2,300 single, built into the tax tables and rate schedules."
+    }
+  }
+}

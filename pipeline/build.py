@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import sys
+from pathlib import Path
 
 import numpy as np
 
@@ -426,6 +427,21 @@ def cpi(report: Report, dollar_year: int) -> dict:
             "ratio": round(latest12 / annual[dollar_year], 6)}
 
 
+def wid_index_series(latest: int) -> dict:
+    """WID national income price index (rebased to 1 in the dollar year) and
+    national income per adult in dollar-year dollars, 1913 onward. Used to
+    index historical tax brackets by inflation or by income growth."""
+    df = wid.load("US")
+    idx = wid.series(df, "inyixxi999")
+    ni = wid.series(df, "anninci992")
+    years = [int(y) for y in idx.index if 1913 <= y <= latest]
+    base = float(idx[latest])
+    return {
+        "priceIndex": {str(y): round(float(idx[y]) / base, 6) for y in years},
+        "nationalIncomePerAdult": {str(y): round(float(ni[y]) * base / float(idx[idx.index.max()])) for y in years},
+    }
+
+
 def build_macro(report: Report, latest: int) -> dict:
     """BEA NIPA Table 1.12 series used by the engine and tax mode.
 
@@ -449,6 +465,7 @@ def build_macro(report: Report, latest: int) -> dict:
         "agiMillions": {str(y): v for y, v in agi.items()},
         "agiToNationalIncome": {str(y): round(v / float(ni[y]), 4) for y, v in agi.items()},
         "cpi": cpi(report, latest),
+        **wid_index_series(latest),
     }
 
 
@@ -551,10 +568,22 @@ def build_tax_brackets(report: Report) -> dict:
         if notes.get(y):
             entry["note"] = notes[y]
         years[str(y)] = entry
+    law = json.loads((Path(__file__).parent / "manual" / "tax_law.json").read_text())
+    cl = law["currentLaw"]
+    for st in ("single", "mfj"):
+        thr = [t for _, t in cl[st]]
+        if thr[0] != 0 or any(b <= a for a, b in zip(thr, thr[1:])):
+            report.errors.append(f"current law {st}: thresholds not increasing from 0")
+    for y, d in law["deductions"].items():
+        if y not in years:
+            report.errors.append(f"tax_law.json: deduction rules for {y} but no schedule")
+        else:
+            years[y]["deduction"] = {k: v for k, v in d.items() if k != "source"}
     return {"meta": {"source": "taxfoundation", "check": "irs-soi Historical Table 23",
                      "units": "rate as fraction, lower threshold of taxable income in "
                               "current dollars"},
-            "featuredYears": TAX_YEARS, "byYear": years}
+            "featuredYears": TAX_YEARS, "byYear": years,
+            "currentLaw": {k: v for k, v in cl.items() if not k.endswith("ource")}}
 
 
 def write(name: str, data: dict) -> None:
