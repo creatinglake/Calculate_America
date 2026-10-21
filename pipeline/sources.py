@@ -102,4 +102,16 @@ SOURCES = [
         "citation": "Tax Foundation, Historical U.S. Federal Individual Income Tax Rates "
                     "& Brackets, 1862-2025. Downloaded by Adam Lake, October 2026.",
     },
+    {
+        "id": "bls-cpi",
+        "title": "US Bureau of Labor Statistics, Consumer Price Index for All Urban "
+                 "Consumers (CPI-U), series CUUR0000SA0",
+        "url": "https://www.bls.gov/cpi/",
+        "files": ["CUUR0000SA0.json"],
+        "used_for": "Converting the income a user enters (today's dollars) into the "
+                    "data's dollars.",
+        "license": "Not yet verified.",
+        "citation": "US Bureau of Labor Statistics, CPI-U, all items, US city average, "
+                    "not seasonally adjusted.",
+    },
 ]

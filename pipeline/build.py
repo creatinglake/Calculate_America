@@ -391,6 +391,41 @@ def irs_agi(report: Report) -> dict[int, float]:
     return agi
 
 
+def cpi(report: Report, dollar_year: int) -> dict:
+    """CPI-U for converting a user's income (entered in today's dollars) into
+    the data's dollars: average of the latest 12 months over the dollar
+    year's annual average (plan section 2, "Real dollars")."""
+    raw = json.loads((wid.RAW / "bls" / "CUUR0000SA0.json").read_text())
+    if raw.get("status") != "REQUEST_SUCCEEDED":
+        report.errors.append(f"BLS CPI download failed: {raw.get('message')}")
+        return {}
+    rows = raw["Results"]["series"][0]["data"]
+
+    def value(r: dict) -> float | None:
+        try:
+            return float(r["value"])
+        except ValueError:  # "-": e.g. October 2025, lapse in appropriations
+            return None
+
+    annual = {int(r["year"]): value(r) for r in rows if r["period"] == "M13"}
+    monthly = {(int(r["year"]), int(r["period"][1:])): value(r)
+               for r in rows if r["period"] != "M13"}
+    y, m = max(k for k, v in monthly.items() if v is not None)
+    window = [((y * 12 + m - 1 - i) // 12, (y * 12 + m - 1 - i) % 12 + 1) for i in range(12)]
+    values = [monthly.get(k) for k in window]
+    available = [v for v in values if v is not None]
+    missing = [f"{a}-{b:02d}" for (a, b), v in zip(window, values) if v is None]
+    if len(available) < 10 or annual.get(dollar_year) is None:
+        report.errors.append("BLS CPI: too few months, or no annual average for the dollar year")
+        return {}
+    latest12 = sum(available) / len(available)
+    return {"series": "CUUR0000SA0", "dollarYear": dollar_year,
+            "dollarYearAverage": annual[dollar_year],
+            "latest12MonthAverage": round(latest12, 3),
+            "through": f"{y}-{m:02d}", "missingMonths": missing,
+            "ratio": round(latest12 / annual[dollar_year], 6)}
+
+
 def build_macro(report: Report, latest: int) -> dict:
     """BEA NIPA Table 1.12 series used by the engine and tax mode.
 
@@ -413,6 +448,7 @@ def build_macro(report: Report, latest: int) -> dict:
         "nationalIncomeMillions": {str(y): float(ni[y]) for y in years},
         "agiMillions": {str(y): v for y, v in agi.items()},
         "agiToNationalIncome": {str(y): round(v / float(ni[y]), 4) for y, v in agi.items()},
+        "cpi": cpi(report, latest),
     }
 
 
