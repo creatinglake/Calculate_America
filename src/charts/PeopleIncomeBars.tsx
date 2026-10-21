@@ -35,11 +35,14 @@ function Bar({ label, shares, keys = GROUP_KEYS, inset = false }: {
   );
 }
 
-export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, gini, hideGini = false }: {
+export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, gini, hideGini = false, noun = 'income' }: {
   today: GroupShares; scenario: GroupShares; todayLabel: string; scenarioLabel: string;
   gini: { today: number; scenario: number };
   hideGini?: boolean;
+  /** 'income' or 'wealth' */
+  noun?: string;
 }) {
+  const Noun = noun[0]!.toUpperCase() + noun.slice(1);
   const top1 = (g: GroupShares) => g.t09 + g.t009 + g.t001;
   // Each top group as a share of the top 1% of adults: 90%, 9%, 1%.
   const zoomPeople = Object.fromEntries(TOP1.map((k) => [k, GROUP_POP[k] / 0.01])) as Record<GroupKey, number>;
@@ -49,8 +52,8 @@ export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, g
         <tr>
           <th scope="col">Group</th>
           <th scope="col">Share of adults</th>
-          <th scope="col">Income, {todayLabel}</th>
-          <th scope="col">Income, {scenarioLabel}</th>
+          <th scope="col">{Noun}, {todayLabel}</th>
+          <th scope="col">{Noun}, {scenarioLabel}</th>
         </tr>
       </thead>
       <tbody>
@@ -75,8 +78,8 @@ export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, g
   );
   return (
     <ChartFrame
-      title="Share of people vs share of income"
-      description="Each bar is everyone. The top groups are slivers of the people but large blocks of the income."
+      title={`Share of people vs share of ${noun}`}
+      description={`Each bar is everyone. The top groups are slivers of the people but large blocks of the ${noun}.`}
       table={table}
     >
       <ul className="legend-row" style={{ marginTop: 0 }}>
@@ -86,18 +89,18 @@ export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, g
       </ul>
       <div className="bars">
         <Bar label="Adults" shares={GROUP_POP} />
-        <Bar label={`Income, ${todayLabel}`} shares={today} />
-        <Bar label={`Income, ${scenarioLabel}`} shares={scenario} />
+        <Bar label={`${Noun}, ${todayLabel}`} shares={today} />
+        <Bar label={`${Noun}, ${scenarioLabel}`} shares={scenario} />
       </div>
       <p className="zoom-note">
-        Zoom in on the top 1% of adults (magnified 100 times). Together they receive {pct(top1(today))} of all income
-        in {todayLabel}, and would receive {pct(top1(scenario))} divided like {scenarioLabel}.
+        Zoom in on the top 1% of adults (magnified 100 times). Together they have {pct(top1(today))} of all {noun}
+        in {todayLabel}, and would have {pct(top1(scenario))} divided like {scenarioLabel}.
       </p>
       <Bar label="The top 1% of adults, split into its three groups (% of the top 1%)" shares={zoomPeople} keys={TOP1} inset />
       {!hideGini && <p className="fine" style={{ marginTop: '1rem' }}>
         Gini coefficient: {gini.today.toFixed(3)} in {todayLabel}, {gini.scenario.toFixed(3)} divided like {scenarioLabel}.
-        The Gini runs from 0 (everyone has the same income) to 1 (one person has all of it). It is computed from 127
-        income groups, which slightly understates it.
+        The Gini runs from 0 (everyone has the same {noun}) to 1 (one person has all of it). It is computed from 127
+        groups, which slightly understates it.
       </p>}
     </ChartFrame>
   );

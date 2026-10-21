@@ -17,8 +17,8 @@ function history(file: DataFile): { year: number; g: GroupShares }[] {
   return file.years.map((year) => ({ year, g: groupShares(fromDataFile(file, year)) }));
 }
 
-export function ShareHistory({ file, label, other, otherLabel }: {
-  file: DataFile; label: string; other: DataFile | null; otherLabel: string;
+export function ShareHistory({ file, label, other, otherLabel, noun = 'income' }: {
+  file: DataFile; label: string; other: DataFile | null; otherLabel: string; noun?: string;
 }) {
   const id = useId();
   const rows = useMemo(() => history(file), [file]);
@@ -59,7 +59,7 @@ export function ShareHistory({ file, label, other, otherLabel }: {
   return (
     <ChartFrame
       title="Who gets what, over time"
-      description={`Each group's share of all income, ${years[0]} to ${years[years.length - 1]}, ${label}. The top three bands together are the top 1%.`}
+      description={`Each group's share of all ${noun}, ${years[0]} to ${years[years.length - 1]}, ${label}. The top three bands together are the top 1%.`}
       table={table}
     >
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-labelledby={`${id}-d`}>
