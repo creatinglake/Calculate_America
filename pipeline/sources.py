@@ -47,4 +47,15 @@ SOURCES = [
                     "States: Using Tax Data to Measure Long-term Trends. Journal of "
                     "Political Economy 132(7). Data extended through 2022.",
     },
+    {
+        "id": "dfa",
+        "title": "Federal Reserve Board, Distributional Financial Accounts",
+        "url": "https://www.federalreserve.gov/releases/z1/dataviz/dfa/",
+        "files": ["dfa.zip"],
+        "used_for": "Household net worth shares by wealth group, quarterly from 1989 Q3 "
+                    "(history chart only).",
+        "license": "Not yet verified (VERIFICATION.md V13).",
+        "citation": "Board of Governors of the Federal Reserve System, Distributional "
+                    "Financial Accounts of the United States.",
+    },
 ]

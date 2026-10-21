@@ -330,6 +330,40 @@ def build_us_as(report: Report, pretax: dict, latest: int) -> dict:
     return out
 
 
+DFA_GROUPS = {"Bottom50": "b50", "Next40": "m40", "Next9": "u9",
+              "RemainingTop1": "t09", "TopPt1": "top01"}
+
+
+def build_dfa(report: Report) -> dict:
+    """Household net worth shares by wealth group, quarterly (Fed DFA).
+
+    Households, not the 992j unit, and group totals only: used for the
+    group-share history chart and never mixed into 127-bin distributions.
+    """
+    import pandas as pd
+
+    path = wid.RAW / "dfa" / "extracted" / "dfa-networth-shares.csv"
+    df = pd.read_csv(path, usecols=["Date", "Category", "Net worth"])
+    piv = df.pivot(index="Date", columns="Category", values="Net worth")
+    if set(piv.columns) != set(DFA_GROUPS):
+        report.errors.append(f"DFA groups changed: {sorted(piv.columns)}")
+        return {}
+    quarters = sorted(piv.index, key=lambda q: (int(q[:4]), int(q[-1])))
+    for q in quarters:
+        total = float(piv.loc[q].sum())
+        if abs(total - 100) > 0.3:  # published to 0.1 point, five groups
+            report.errors.append(f"DFA {q}: shares sum to {total:.1f}")
+    return {
+        "meta": {"source": "dfa", "unit": "households", "concept": "net worth",
+                 "groups": {v: k for k, v in DFA_GROUPS.items()},
+                 "note": "Households, group totals only. Not comparable bin-by-bin "
+                         "with the 992j wealth distribution."},
+        "quarters": quarters,
+        "shares": {DFA_GROUPS[c]: [round(float(piv.loc[q, c]) / 100, 4) for q in quarters]
+                   for c in DFA_GROUPS},
+    }
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -355,6 +389,7 @@ def main() -> int:
     comparisons = build_comparisons(report)
     us_as = build_us_as(report, {"scale": us["scale"]}, us["latest"])
     presets = {"gildedAge": build_gilded_age(report)}
+    dfa = build_dfa(report)
     manifest = build_manifest(report)
     print_warnings(report.warnings)
     if report.errors:
@@ -367,6 +402,7 @@ def main() -> int:
     write("us-ptinc-as", us_as)
     write("comparisons", comparisons)
     write("presets", presets)
+    write("us-dfa-wealth", dfa)
     write("manifest", manifest)
     return 0
 
