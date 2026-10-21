@@ -109,6 +109,8 @@ export function Methods() {
       cps: cps.data, effRange: [Math.min(...effYears), Math.max(...effYears)],
       currentLaw: brackets.data.currentLaw, revMax: revenueMaximizingTopRate(Q, 0.25),
       adults: p.adults![String(latest)]!,
+      asLatest,
+      fallbackLatest: fallbackShare(p).latest.map((i) => `P${Number((today.p0[i]! * 100).toFixed(3))}`),
     };
   }, [ptinc.data, ptincAs.data, cainc.data, hweal.data, macro.data, cps.data, eff.data, brackets.data]);
 
@@ -150,7 +152,8 @@ export function Methods() {
             <strong>Income before taxes:</strong> pre-tax national income (WID ptinc): wages, business income, capital
             income including corporate profits kept by companies (attributed to their owners), employer benefits and
             payroll taxes, and pensions received. It adds up to national income, which is what makes "the same size economy"
-            consistent across years. Pension contributions are not counted; pension benefits are.
+            consistent across years. Pension contributions are not counted; pension benefits are. (The wage adjustment
+            below does not yet follow this rule exactly; see Placing you.)
           </p>
           <p className="sub">
             <strong>Income after taxes:</strong> post-tax disposable cash income: income after all taxes, plus cash
@@ -174,7 +177,9 @@ export function Methods() {
           <p className="sub">
             Full distributions run from {v.first} to {v.latest}. The World Inequality Database's {v.latest + 1} figures copy
             {' '}{v.latest}'s division exactly, so {v.latest} is the latest year used. Before 1962 only the top groups are
-            observed.
+            observed. "Today" is {v.latest} in the main view, {v.asLatest} with the Auten-Splinter estimates (their latest
+            year), and {v.caincYears[1]} after taxes (the latest published); the wage adjustment and price conversion use{' '}
+            {v.latest} in every view.
           </p>
           <p className="sub">
             Data figures are in {v.latest} dollars, using WID's national income price index. The income you enter is
@@ -194,38 +199,47 @@ export function Methods() {
             Accounts Table 1.12), and add self-employment income, interest, dividends and rent, and pension and Social
             Security benefits as entered. If you share finances, the total is split between two adults.
           </p>
+          <p className="sub">
+            Under review: total compensation also includes employer contributions to pensions and Social Security, which
+            pre-tax national income does not count (it counts the benefits instead), and wages include the employee's own
+            payroll tax. Counting only the parts of compensation that belong in this income concept would give a smaller
+            factor and a somewhat higher rank. This is an open methods question.
+          </p>
           <Formula>your income = (wages × {v.comp.toFixed(3)} + other income) ÷ (2 if you share finances) ÷ {v.cpi.ratio.toFixed(4)}</Formula>
           <p className="sub">
             Corporate profits kept by companies are part of national income but aren't asked for, so your rank is
-            approximate: give or take two or three percentiles.
+            approximate.
           </p>
         </Section>
 
         <Section id="quantile-h" title="Income at each percentile">
           <p className="sub">
             The data give each group's average income and the income at its lower edge. To find the income at any
-            percentile, we use the method the World Inequality Database itself uses, generalized Pareto interpolation
-            (Blanchet, Fournier and Piketty, 2017). With x = −ln(1 − p), define
+            percentile, we use a method based on the one the World Inequality Database uses, generalized Pareto
+            interpolation (Blanchet, Fournier and Piketty, 2017). With x = −ln(1 − p), define
           </p>
           <Formula>φ(x) = −ln( total income of everyone above percentile p )</Formula>
           <p className="sub">
             At every group edge both φ and its slope are known exactly from the data: the slope is the edge income times
-            (1 − p), divided by the income above p. Between edges φ is a quintic polynomial matching φ, its slope and an
-            estimated second derivative at both ends. Income at percentile p is then
+            (1 − p), divided by the income above p. Between edges φ is a quintic polynomial matching φ, its slope and a
+            second derivative estimated from the neighbouring edges' slopes (the published method solves for these jointly
+            for extra smoothness). Income at percentile p is then
           </p>
           <Formula>Q(p) = φ′(x) · e^(x − φ(x))</Formula>
           <p className="sub">
             This passes through every published edge income and reproduces every group's published average exactly, by
             construction. Above the last edge (P99.999) incomes follow a Pareto curve with b = average ÷ edge income and
-            α = b ÷ (b − 1).
+            α = b ÷ (b − 1) (the published method uses a generalized Pareto tail).
           </p>
           <p className="sub">
             Where the curve would not be increasing inside a group, that group uses Q = t₀ + (t₁ − t₀)·u^k instead, where u
             is the position within the group, t₀ and t₁ its edge incomes, and k is set so the group's average is exact. This
             happens in {pct(v.fallback.ptinc.share)} of income groups across all years ({pct(v.fallback.cainc.share)} after
-            taxes, {pct(v.fallback.hweal.share)} for wealth). In {v.latest} it occurs at the edges where groups become ten
-            times narrower (P99, P99.9, P99.99): WID's published edge incomes are the midpoints of neighbouring group
-            averages, which no smooth curve can always pass through. This shows as small kinks in the income chart.
+            taxes, {pct(v.fallback.hweal.share)} for wealth). In {v.latest} it is used for the groups starting at{' '}
+            {v.fallbackLatest.join(', ')}, mostly next to the edges where groups become ten times narrower. WID's published
+            edge incomes are the midpoints of neighbouring group averages, which a smooth curve can't always pass through
+            there. This shows as small kinks in the income chart. The bottom group's lower edge is 0, or twice its average
+            when that is negative.
           </p>
           <p className="sub">Your rank is found by searching for the percentile whose income equals yours.</p>
         </Section>
@@ -254,7 +268,12 @@ export function Methods() {
             <strong>Over a career:</strong> for each year from the year you started to {v.latest}, someone at your
             percentile receives that year's average income divided like the scenario, against what that percentile actually
             received that year. The differences are added up in today's dollars. You are assumed to stay at the same
-            percentile every year.
+            percentile every year. The "smaller economy" slider applies to every year.
+          </p>
+          <p className="sub">
+            <strong>After taxes:</strong> the income you enter is before taxes, so it sets your percentile in the
+            before-tax distribution of the same year; the result compares what someone at that percentile has after taxes
+            and cash transfers, now and under the scenario.
           </p>
         </Section>
 
@@ -293,7 +312,7 @@ export function Methods() {
             smoothly with rank (straight-line pieces joined at the group edges), chosen as the smoothest such factor that
             makes every group's share exactly what you set. Scaling each group by one number would leave jumps at the group
             edges. Edge incomes are then set at the midpoints of neighbouring averages. If a lower group would have more per
-            person than a higher one, the setting is refused.
+            person than a higher one, or the result would not rise steadily from bottom to top, the setting is refused.
           </p>
           <p className="sub"><strong>Blend:</strong> two divisions mixed at weight t, each scaled to its own average:</p>
           <Formula>Q(p) = [(1 − t) · Q_A(p) ÷ average_A + t · Q_B(p) ÷ average_B] × today's average</Formula>
@@ -335,13 +354,16 @@ export function Methods() {
         <Section id="taxes-h" title="Tax scenarios">
           <p className="sub">
             Today's pre-tax incomes are taxed under another schedule, and the extra revenue is returned by the rule you
-            pick. Revenue is always the scenario's taxes minus current taxes on the same incomes.
+            pick. Revenue is always the scenario's taxes minus current taxes. With the behavior slider at 0 both are on the
+            same incomes; above 0, the scenario's taxes are on the incomes after people respond.
           </p>
           <p className="sub">
             <strong>Effective rates (the default):</strong> each group's average tax rate, all taxes (federal, state and
             local; income, payroll, corporate, property, estate and sales), from Piketty, Saez and Zucman's Table G1,{' '}
-            {v.effRange[0]} to {v.effRange[1]}. The three top groups are separated from the published cumulative groups using
-            each group's share of income. "Current" is {v.effRange[1]}, the latest year with estimates.
+            {v.effRange[0]} to {v.effRange[1]}. The table publishes cumulative top groups; the rates for P90 to P99, P99 to
+            P99.9 and P99.9 to P99.99 are separated from them using each group's share of income (the top 0.01% rate is
+            published directly). The table's rates are measured against income including capital gains; here they are
+            applied to pre-tax national income. "Current" is {v.effRange[1]}, the latest year with estimates.
           </p>
           <p className="sub">
             <strong>Brackets:</strong> federal income tax only. Brackets apply to taxable income, not national income, so
@@ -350,14 +372,26 @@ export function Methods() {
           <Formula>taxable income = income × (AGI ÷ national income) − standard deduction − exemptions</Formula>
           <p className="sub">
             using IRS adjusted gross income over BEA national income for {v.latest} ({(v.agi[String(v.latest)] ?? 0).toFixed(3)};
-            {' '}it was {(v.agi['1963'] ?? 0).toFixed(3)} in 1963). Historical deductions follow the IRS reports: in 1953 and
+            {' '}it was {(v.agi['1963'] ?? 0).toFixed(3)} in 1963). The same ratio is used for everyone and for every schedule,
+            since all schedules are applied to today's incomes; in reality the share of income that shows up as AGI differs
+            a lot between income levels. Historical deductions follow the IRS reports: in 1953 and
             1963, 10% of AGI up to $1,000, plus $600 per exemption; in 1980 a zero bracket amount built into the schedule.
             Current law is {v.currentLaw.year} (IRS Revenue Procedure 2025-32), converted to {v.latest} dollars with CPI-U.
-            Historical brackets are moved to today either by inflation or by growth in income per adult; the second keeps
-            each bracket at the same place in the distribution. Each adult is taxed as a single filer, which equals joint
-            filing with full income splitting; your own result uses the joint schedule if you share finances. Tax is
-            computed exactly across each group, including the Pareto tail, because tax is a straight line between bracket
-            edges.
+            Historical brackets are moved to today either by inflation (WID's national income price index) or by growth in
+            national income per adult; the second keeps each bracket at the same multiple of average income, though not at
+            the same percentile, because the shape of the distribution has changed. Each adult is taxed as a single filer.
+            For 1953 and 1963 that matches joint filing for the brackets (joint brackets were exactly double), but not for
+            the standard deduction, whose $1,000 cap applied per couple; in 1980 and today, joint brackets are not double
+            the single ones. Your own result uses the joint schedule if you share finances. Tax is computed exactly across
+            each group, including the Pareto tail, because tax is a straight line between bracket edges.
+          </p>
+          <p className="sub">
+            <strong>Not modelled:</strong> the limits that kept actual top rates below the schedules. In 1953 the maximum
+            effective rate was 88% (Tax Foundation); in 1963 income tax was limited to 87% of taxable income and capital
+            gains could be taxed at an alternative 50% rate (IRS, Statistics of Income 1963); in 1980 a 50% maximum rate
+            applied to personal service income (IRS, Statistics of Income 1980). The schedules here apply 92%, 91% and 70%
+            to all income in the top brackets, so they overstate those years' taxes at the very top. Credits, the
+            alternative minimum tax and itemized deductions are also not modelled.
           </p>
           <p className="sub">
             <strong>Returning the revenue:</strong> an equal amount per adult; equal amounts to the bottom 50% only; to
@@ -366,9 +400,12 @@ export function Methods() {
           </p>
           <p className="sub">
             <strong>Behavior:</strong> with elasticity e, each group's pre-tax income becomes income × ((1 − τ′) ÷ (1 − τ))^e,
-            where τ and τ′ are the current and scenario marginal rates (average rates for effective schedules). The
+            where τ and τ′ are the current and scenario marginal tax per extra dollar of national income at the group's
+            average (for brackets, the statutory rate × the AGI ratio, so a 37% bracket counts as about{' '}
+            {pct(0.37 * (v.agi[String(v.latest)] ?? 0), 0)}; for effective schedules, the group's average rate). The
             revenue-maximizing top rate is 1 ÷ (1 + a·e), with a the Pareto coefficient of the top 1% in the data
-            {v.revMax && <> ({v.revMax.pareto.toFixed(2)}, giving {pct(v.revMax.rate, 0)} at e = 0.25)</>}.
+            {v.revMax && <> ({v.revMax.pareto.toFixed(2)}, giving {pct(v.revMax.rate, 0)} at e = 0.25)</>}. That rate is a total
+            marginal rate on national income from all taxes, not a federal bracket rate on taxable income.
           </p>
         </Section>
 
