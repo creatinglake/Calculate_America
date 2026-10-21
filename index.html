@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fair Share · Calculate America</title>
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      // Theme before first paint: saved choice, else system light, else dark.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('fairshare-theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
     <meta name="description" content="See how the US economy divides its income and wealth, and what your income would be if it were divided differently." />
   </head>
   <body>

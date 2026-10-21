@@ -87,3 +87,22 @@ describe('quantile: Pareto tail', () => {
     relClose(Q.q(Q.rank(huge)), huge, 1e-9);
   });
 });
+
+describe('quantile: integral over any range', () => {
+  const d = fromDataFile(loadData('us-ptinc'), 2023);
+  const Q = buildQuantile(d);
+  it('matches bin means on bin edges', () => {
+    for (const k of [0, 50, 98, 99, 108, 117, 125]) {
+      relClose(Q.meanBetween(d.p0[k]!, d.p1[k]!), d.avg[k]!, 1e-9);
+    }
+  });
+  it('is additive and gives the overall mean over [0, 1]', () => {
+    relClose(Q.integral(0, 0.3) + Q.integral(0.3, 0.995) + Q.integral(0.995, 1), Q.integral(0, 1), 1e-9);
+    relClose(Q.integral(0, 1), d.avg.reduce((a, v, i) => a + v * width(d, i), 0), 1e-9);
+  });
+  it('agrees with numerical integration inside a bin and in the tail', () => {
+    for (const [a, b] of [[0.4512, 0.4583], [0.99912, 0.99918], [0.999992, 0.9999995]] as const) {
+      relClose(Q.integral(a, b), integrate(Q.q, a, b, 20000), 1e-6);
+    }
+  });
+});

@@ -20,7 +20,7 @@ export interface CareerResult {
  * at percentile p earned that year, against what they'd have earned with that
  * year's average income divided like the scenario. Summed in real dollars.
  */
-export function career(p: number, startYear: number, years: ReadonlyMap<number, Shape>, scenario: Shape): CareerResult {
+export function career(p: number, startYear: number, years: ReadonlyMap<number, Shape>, scenario: Shape, growthPenalty = 0): CareerResult {
   const last = Math.max(...years.keys());
   const byYear: CareerResult['byYear'] = [];
   const skipped: number[] = [];
@@ -31,7 +31,7 @@ export function career(p: number, startYear: number, years: ReadonlyMap<number, 
       continue;
     }
     const actual = shape.Q.q(p);
-    const alt = counterfactual(p, shape.mean, scenario);
+    const alt = counterfactual(p, shape.mean, scenario, growthPenalty);
     byYear.push({ year: y, actual, scenario: alt, difference: alt - actual });
   }
   return { total: byYear.reduce((a, r) => a + r.difference, 0), byYear, skipped };
@@ -47,4 +47,34 @@ export function workEquivalent(difference: number, income: number, annualHours =
 /** "You earn more than X% of adults." "Your income is N x the median." */
 export function rankInWords(percentile: number, income: number, median: number) {
   return { percentAbove: percentile * 100, multipleOfMedian: median > 0 ? income / median : null };
+}
+
+/** Default assumptions for the income-to-wealth link (plan section 8). */
+export const DEFAULT_SAVE_RATE = 0.1;
+export const DEFAULT_REAL_RETURN = 0.03;
+
+export interface Accumulation {
+  /** Wealth at the end of the last year, in real dollars. */
+  total: number;
+  /** Total saved before returns. */
+  contributions: number;
+  byYear: { year: number; saved: number; balance: number }[];
+}
+
+/**
+ * "If your yearly income difference had been saved at rate s and earned real
+ * return r, you'd have N more." Each year's saving is added at the end of the
+ * year and earns the return in later years. Negative differences are
+ * withdrawals (less saved).
+ */
+export function accumulate(flows: { year: number; amount: number }[], saveRate: number, realReturn: number): Accumulation {
+  let balance = 0, contributions = 0;
+  const byYear: Accumulation['byYear'] = [];
+  for (const f of [...flows].sort((a, b) => a.year - b.year)) {
+    const saved = f.amount * saveRate;
+    balance = balance * (1 + realReturn) + saved;
+    contributions += saved;
+    byYear.push({ year: f.year, saved, balance });
+  }
+  return { total: balance, contributions, byYear };
 }

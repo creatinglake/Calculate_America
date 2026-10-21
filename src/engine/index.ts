@@ -8,3 +8,5 @@ export * from './results';
 export * from './placement';
 export * from './builders';
 export * from './url';
+export * from './zoom';
+export * from './taxes';

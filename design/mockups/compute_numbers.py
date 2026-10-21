@@ -184,6 +184,14 @@ def main():
     P("- Group population shares (50%, 40%, 9%, 0.9%, 0.09%, 0.01%), 'Top 1%', 'Top 0.1%', band names P0-90, P90-99, P99-99.9, P99.9-100,")
     P("  inset proportions 90% / 9% / 1% of the top 1%, the sample income $60,000, and the years 1963 and 2023 are definitions or inputs from FAIRSHARE_PLAN.md.")
     P("- Every other figure on the mockup pages is printed above. build_mockups.py imports compute() from this script, so the pages and this file cannot drift.")
+    P()
+    P("## Round 2 additions (D Studio, E Harbor; built by build_mockups_de.py)")
+    P(f"- Rank bar in the input panel: filled to p = {c['p_user'] * 100:.2f}% of its width; text 'Higher than about {int(c['p_user'] * 100)}%'.")
+    P(f"- Result card comparison bars: {money(c['user'])} bar is {c['user'] / c['cf_r'] * 100:.2f}% of the {money(c['cf_r'])} bar (lengths only, no new figure shown).")
+    P(f"- Income bars: 2023 and 1963 group shares from the table above; brackets labelled 'Top 1%: {pct(c['top1']['now'])}' and 'Top 1%: {pct(c['top1']['base'])}'.")
+    P("- Data table under the bars adds a 'Top 1% (last three rows)' total row using the Top 1% line above.")
+    P("- Year picker options: the years present in the data file's byYear (1962-2023 less 2023), labels only.")
+    P("- No other figures appear on D or E; all other numbers are the same values printed above.")
 
 
 if __name__ == "__main__":

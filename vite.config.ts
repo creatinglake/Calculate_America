@@ -7,6 +7,6 @@ import { routePages } from './scripts/route-pages.ts';
 export default defineConfig({
   plugins: [react(), tailwindcss(), routePages()],
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
   },
 });
