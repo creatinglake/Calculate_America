@@ -1,8 +1,10 @@
 name: Deploy to GitHub Pages
 
-# Manual for now. Switch to `push: branches: [main]` at launch (Phase 9),
-# once Pages is enabled for the repo and DNS points at GitHub.
+# Deploys fairshare.calculateamerica.com on every push to main (launched
+# 2026-10-21), and can be run by hand.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
