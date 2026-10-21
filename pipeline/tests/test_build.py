@@ -74,3 +74,16 @@ def test_smooth_rescaling_identity_when_targets_unchanged():
     d = dist(tilt=1.2)
     out = build.rescale_to_groups(d, build.group_shares(d.share))
     assert np.allclose(out.avg, d.avg) and np.allclose(out.share, d.share)
+
+
+def test_six_group_rates_split_cumulative_groups():
+    shares = {"Bottom 50%": 0.2, "Middle 40%": 0.4, "Top 10%": 0.4, "Top 1%": 0.15,
+              "Top 0.1%": 0.06, "Top 0.01%": 0.02}
+    rates = {"Bottom 50%": 0.2, "Middle 40%": 0.25, "Top 10%": 0.3, "Top 1%": 0.36,
+             "Top 0.1%": 0.4, "Top 0.01%": 0.45}
+    six = build.six_group_rates(rates, shares)
+    assert np.isclose(six["u9"], (0.3 * 0.4 - 0.36 * 0.15) / 0.25)
+    groups = build.group_shares_from_cumulative(shares)
+    # weighted group rates reproduce the top-10% rate
+    top = sum(six[g] * groups[g] for g in ("u9", "t09", "t009", "t001"))
+    assert np.isclose(top / 0.4, 0.3)

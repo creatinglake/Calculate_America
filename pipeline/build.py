@@ -387,6 +387,51 @@ def build_macro(report: Report, latest: int) -> dict:
     }
 
 
+def six_group_rates(rates: dict[str, float], shares: dict[str, float]) -> dict[str, float]:
+    """Average tax rates for the six non-overlapping groups from PSZ's
+    cumulative top groups, weighting by pre-tax income shares:
+    rate(P90-99) = (rate10*share10 - rate1*share1) / (share10 - share1), etc."""
+    def between(hi: str, lo: str) -> float:
+        return (rates[hi] * shares[hi] - rates[lo] * shares[lo]) / (shares[hi] - shares[lo])
+    return {
+        "b50": rates["Bottom 50%"], "m40": rates["Middle 40%"],
+        "u9": between("Top 10%", "Top 1%"), "t09": between("Top 1%", "Top 0.1%"),
+        "t009": between("Top 0.1%", "Top 0.01%"), "t001": rates["Top 0.01%"],
+    }
+
+
+def build_effective_tax(report: Report) -> dict:
+    """PSZ Table G1 average tax rates (all taxes, % of pre-tax income incl.
+    capital gains), split into the six groups using Table B1 income shares."""
+    g1, b1 = psz.share_table("TG1"), psz.share_table("TB1")
+    out = {}
+    for y in sorted(g1):
+        if y < FIRST_YEAR or y not in b1:
+            continue
+        six = six_group_rates(g1[y], b1[y])
+        if not all(0 <= v < 1 for v in six.values()):
+            report.errors.append(f"PSZ G1 {y}: group rate out of range {six}")
+        sh = group_shares_from_cumulative(b1[y])
+        implied = sum(six[k] * sh[k] for k in six)
+        gap = abs(implied - g1[y]["All"])
+        if gap > 0.015:
+            report.errors.append(f"PSZ G1 {y}: six-group rates imply {implied:.3f}, All {g1[y]['All']:.3f}")
+        elif gap > 0.005:
+            report.warnings.append(f"PSZ G1 {y}: six-group rates imply {implied:.3f}, All {g1[y]['All']:.3f}")
+        out[str(y)] = {k: round(v, 4) for k, v in six.items()} | {"all": round(g1[y]["All"], 4)}
+    return {"meta": {"source": "psz2022", "table": "TG1", "weights": "TB1",
+                     "scope": "All taxes: federal, state and local; income, payroll, "
+                              "corporate, property, estate, sales.",
+                     "denominator": "pre-tax income including taxable capital gains"},
+            "byYear": out}
+
+
+def group_shares_from_cumulative(s: dict[str, float]) -> dict[str, float]:
+    return {"b50": s["Bottom 50%"], "m40": s["Middle 40%"],
+            "u9": s["Top 10%"] - s["Top 1%"], "t09": s["Top 1%"] - s["Top 0.1%"],
+            "t009": s["Top 0.1%"] - s["Top 0.01%"], "t001": s["Top 0.01%"]}
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -414,6 +459,7 @@ def main() -> int:
     presets = {"gildedAge": build_gilded_age(report)}
     dfa = build_dfa(report)
     macro = build_macro(report, us["latest"])
+    eff_tax = build_effective_tax(report)
     manifest = build_manifest(report)
     print_warnings(report.warnings)
     if report.errors:
@@ -428,6 +474,7 @@ def main() -> int:
     write("presets", presets)
     write("us-dfa-wealth", dfa)
     write("us-macro", macro)
+    write("us-tax-effective", eff_tax)
     write("manifest", manifest)
     return 0
 

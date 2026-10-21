@@ -27,7 +27,7 @@ def _rows(sheet: str, path: Path = WORKBOOK) -> list[tuple]:
 def share_table(sheet: str, path: Path = WORKBOOK) -> dict[int, dict[str, float]]:
     """{year: {"Top 1%": 0.19, ...}} for a group-share table."""
     rows = _rows(sheet, path)
-    header_i = next(i for i, r in enumerate(rows) if r[1] in ("Bottom 90%", "Bottom 50%"))
+    header_i = next(i for i, r in enumerate(rows) if r[1] in ("Bottom 90%", "Bottom 50%", "All"))
     header = rows[header_i]
     out: dict[int, dict[str, float]] = {}
     for r in rows[header_i + 1:]:
