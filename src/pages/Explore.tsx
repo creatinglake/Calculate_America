@@ -1,11 +1,12 @@
 /** /explore: the calculator (plan 6.1). */
 import { useMemo, useState } from 'react';
-import { fromDataFile, groupShares } from '../engine';
+import { fromDataFile, groupShares, shapeOf } from '../engine';
 import { useCalculatorData } from '../app/useData';
 import { useViewState } from '../app/useViewState';
 import { EMPTY_FIELDS, IncomeForm, toAnswers, type IncomeFields } from '../components/IncomeForm';
 import { ResultCard } from '../components/ResultCard';
 import { PeopleIncomeBars } from '../charts/PeopleIncomeBars';
+import { StretchedChart } from '../charts/StretchedChart';
 import { ScenarioPicker } from '../components/ScenarioPicker';
 import { Switches } from '../components/Switches';
 import { calculate } from '../model/calculate';
@@ -69,6 +70,17 @@ export function Explore() {
           />
         )}
         {resolved.ok && resolved.scenario.note && <p className="text-sm text-[var(--text-muted)]">{resolved.scenario.note}</p>}
+        {resolved.ok && (
+          <StretchedChart
+            today={shapeOf(resolved.today.dist)} scenario={shapeOf(resolved.scenario.dist)}
+            todayLabel={String(resolved.today.year)} scenarioLabel={resolved.scenario.label}
+            dollarYear={Number(series.meta.dollarYear ?? resolved.today.year)}
+            you={calc ? calc.percentile : null}
+            growthBase={state.scenario.kind === 'year'
+              ? { shape: shapeOf(fromDataFile(series, state.scenario.year)), label: String(state.scenario.year) }
+              : null}
+          />
+        )}
         {resolved.ok && (
           <PeopleIncomeBars
             today={groupShares(resolved.today.dist)} scenario={groupShares(resolved.scenario.dist)}
