@@ -34,4 +34,17 @@ SOURCES = [
                     "Accounts: Methods and Estimates for the United States. Quarterly "
                     "Journal of Economics 133(2): 553-609. Updated series, February 2022.",
     },
+    {
+        "id": "autensplinter",
+        "title": "Auten and Splinter, Income Inequality in the United States: Using Tax "
+                 "Data to Measure Long-term Trends (extension through 2022)",
+        "url": "https://davidsplinter.com/",
+        "files": ["AutenSplinter-IncomeIneq.xlsx"],
+        "used_for": "Alternative pre-tax group shares, 1962-2022 (Table C2, Pre-tax "
+                    "National Income), applied to the PSZ shape.",
+        "license": "Not stated on the source page; published by the authors for public use.",
+        "citation": "Auten, G. and Splinter, D. (2024). Income Inequality in the United "
+                    "States: Using Tax Data to Measure Long-term Trends. Journal of "
+                    "Political Economy 132(7). Data extended through 2022.",
+    },
 ]
