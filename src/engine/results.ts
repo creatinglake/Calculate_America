@@ -20,7 +20,7 @@ export interface CareerResult {
  * at percentile p earned that year, against what they'd have earned with that
  * year's average income divided like the scenario. Summed in real dollars.
  */
-export function career(p: number, startYear: number, years: ReadonlyMap<number, Shape>, scenario: Shape): CareerResult {
+export function career(p: number, startYear: number, years: ReadonlyMap<number, Shape>, scenario: Shape, growthPenalty = 0): CareerResult {
   const last = Math.max(...years.keys());
   const byYear: CareerResult['byYear'] = [];
   const skipped: number[] = [];
@@ -31,7 +31,7 @@ export function career(p: number, startYear: number, years: ReadonlyMap<number, 
       continue;
     }
     const actual = shape.Q.q(p);
-    const alt = counterfactual(p, shape.mean, scenario);
+    const alt = counterfactual(p, shape.mean, scenario, growthPenalty);
     byYear.push({ year: y, actual, scenario: alt, difference: alt - actual });
   }
   return { total: byYear.reduce((a, r) => a + r.difference, 0), byYear, skipped };

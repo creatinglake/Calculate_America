@@ -106,7 +106,7 @@ export function Explore() {
           {resolved.ok && calc && shapes && (
             <CareerWealth
               percentile={calc.percentile} scenario={shapes.scenario} scenarioLabel={resolved.scenario.label}
-              shapes={allShapes(series)} cpiRatio={macro.cpi.ratio}
+              shapes={allShapes(series)} cpiRatio={macro.cpi.ratio} growthPenalty={state.growthPenalty}
             />
           )}
           {resolved.ok && resolved.scenario.card && <PresetCard card={resolved.scenario.card} />}

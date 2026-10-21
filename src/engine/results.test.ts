@@ -29,6 +29,12 @@ describe('results', () => {
     expect(r.total).toBeCloseTo(r.byYear.reduce((a, x) => a + x.difference, 0), 6);
   });
 
+  it('career applies the smaller-economy penalty to every year', () => {
+    const s1963 = shapes.get(1963)!;
+    const a = career(0.5, 2010, shapes, s1963), b = career(0.5, 2010, shapes, s1963, 0.1);
+    b.byYear.forEach((r, i) => expect(r.scenario).toBeCloseTo(a.byYear[i]!.scenario * 0.9, 6));
+  });
+
   it('career reports years with no data', () => {
     const gappy = new Map(shapes);
     gappy.delete(2005);

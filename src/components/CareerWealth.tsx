@@ -14,13 +14,15 @@ import { money, moneyDiff, moneyShort } from '../ui/format';
 
 const W = 640, H = 200, M = { top: 10, right: 12, bottom: 24, left: 56 };
 
-export function CareerWealth({ percentile, scenario, scenarioLabel, shapes, cpiRatio }: {
+export function CareerWealth({ percentile, scenario, scenarioLabel, shapes, cpiRatio, growthPenalty = 0 }: {
   percentile: number;
   scenario: Shape;
   scenarioLabel: string;
   /** Every available year's distribution in the series in use. */
   shapes: ReadonlyMap<number, Shape>;
   cpiRatio: number;
+  /** The "smaller economy" slider, applied to every year. */
+  growthPenalty?: number;
 }) {
   const id = useId();
   const years = [...shapes.keys()].sort((a, b) => a - b);
@@ -30,10 +32,10 @@ export function CareerWealth({ percentile, scenario, scenarioLabel, shapes, cpiR
   const [ret, setRet] = useState(DEFAULT_REAL_RETURN);
 
   const result = useMemo(() => {
-    const c = career(percentile, start, shapes, scenario);
+    const c = career(percentile, start, shapes, scenario, growthPenalty);
     const flows = c.byYear.map((r) => ({ year: r.year, amount: r.difference * cpiRatio }));
     return { c, acc: accumulate(flows, save, ret), incomeTotal: c.total * cpiRatio };
-  }, [percentile, start, shapes, scenario, save, ret, cpiRatio]);
+  }, [percentile, start, shapes, scenario, save, ret, cpiRatio, growthPenalty]);
 
   const { c, acc, incomeTotal } = result;
   const yrs = acc.byYear.map((r) => r.year);
@@ -99,7 +101,8 @@ export function CareerWealth({ percentile, scenario, scenarioLabel, shapes, cpiR
       )}
       <p className="assumption">
         Assumptions, not predictions: you stay at the same place in the distribution every year; {Math.round(save * 100)}%
-        of the difference is saved; it earns {(ret * 100).toFixed(1)}% a year after inflation. Today's dollars.
+        of the difference is saved; it earns {(ret * 100).toFixed(1)}% a year after inflation
+        {growthPenalty > 0 ? `; each year's economy is ${Math.round(growthPenalty * 100)}% smaller under the scenario` : ''}. Today's dollars.
       </p>
     </section>
   );
