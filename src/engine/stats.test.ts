@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { fromDataFile, type Distribution } from './distribution';
 import { GROUP_KEYS } from './groups';
 import { buildQuantile } from './quantile';
-import { gini, groupShares, summarize, topShare } from './stats';
+import { gini, groupShares, mostEqualYear, summarize, topShare } from './stats';
 import { loadData } from './test/data';
 
 const file = loadData('us-ptinc');
@@ -49,5 +49,14 @@ describe('stats', () => {
     expect(s.gini).toBeGreaterThan(0);
     expect(s.gini).toBeLessThan(1);
     expect(s.top1ToBottom50).toBeGreaterThan(1);
+  });
+});
+
+describe('most equal year', () => {
+  it('is the minimum Gini across years', () => {
+    const years = new Map(file.years.map((y) => [y, fromDataFile(file, y)] as const));
+    const best = mostEqualYear(years);
+    for (const d of years.values()) expect(gini(d)).toBeGreaterThanOrEqual(best.gini);
+    expect(file.years).toContain(best.year);
   });
 });

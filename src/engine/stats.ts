@@ -62,3 +62,18 @@ export function summarize(d: Distribution, Q: QuantileFn): Summary {
     top1ToBottom50: top1 / 0.01 / (groups.b50 / GROUP_POP.b50),
   };
 }
+
+/**
+ * The year with the lowest Gini (plan section 5, "US most equal year").
+ * Computed from the data, never hard-coded. The lowest top 1% share and the
+ * highest bottom 50% share can fall in different years; the preset card says so.
+ */
+export function mostEqualYear(years: ReadonlyMap<number, Distribution>): { year: number; gini: number } {
+  let best: { year: number; gini: number } | null = null;
+  for (const [year, d] of years) {
+    const g = gini(d);
+    if (!best || g < best.gini) best = { year, gini: g };
+  }
+  if (!best) throw new Error('no years given');
+  return best;
+}
