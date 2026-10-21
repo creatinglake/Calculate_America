@@ -14,6 +14,13 @@ FILES = [
     "05in01an.xls",    # Table 1, all returns: sources of income and tax items, 1913-2005
     "23in41ts.xlsx",   # Table 4.1, returns, shares of AGI, AGI floors, recent years
     "histab1.xls",     # SOI Bulletin Historical Table 1, selected income and tax items
+    "histab4.xls",     # Historical Table 4, NIPA personal income vs AGI
+    "histab5.xls",     # Historical Table 5, personal income and total AGI
+    "histab8.xls",     # Historical Table 8, personal income, taxable income, tax
+    "53soireppt1ar.pdf",  # Statistics of Income 1953, Part 1 (individual returns)
+    "63inar.pdf",      # Statistics of Income 1963, Individual Income Tax Returns
+    "80inar.pdf",      # Statistics of Income 1980, Individual Income Tax Returns
+    "23in11si.xls",    # Publication 1304 Table 1.1, all returns, tax year 2023
 ]
 
 

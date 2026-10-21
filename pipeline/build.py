@@ -365,6 +365,31 @@ def build_dfa(report: Report) -> dict:
     }
 
 
+def irs_agi(report: Report) -> dict[int, float]:
+    """Total AGI less deficit (millions) for the years with statutory schedules.
+
+    Transcribed from IRS SOI reports into manual/irs_agi.csv (the older ones
+    are scanned PDFs). Cross-checked here against machine-readable IRS files.
+    """
+    import pandas as pd
+
+    from common import PIPELINE
+
+    rows = pd.read_csv(PIPELINE / "manual" / "irs_agi.csv")
+    agi = {int(r.year): r.agi_less_deficit_thousands / 1000 for r in rows.itertuples()}
+    t11 = pd.read_excel(wid.RAW / "irs" / "23in11si.xls", header=None)
+    all_returns = t11[t11[0].astype(str).str.strip() == "All returns"].iloc[0]
+    if float(all_returns[3]) / 1000 != agi[2023]:
+        report.errors.append(f"IRS AGI 2023: CSV {agi[2023]} vs Table 1.1 {all_returns[3]}")
+    # SOI Table 1 "total income" equals AGI in 1953 (VERIFICATION.md V17).
+    t1 = pd.read_excel(wid.RAW / "irs" / "05in01an.xls", header=None)
+    total_income = {int(float(r[0])): float(r[3]) for _, r in t1.iterrows()
+                    if str(r[0]).replace(".0", "").isdigit()}
+    if round(agi[1953]) != total_income[1953]:
+        report.errors.append(f"IRS AGI 1953: CSV {agi[1953]} vs Table 1 {total_income[1953]}")
+    return agi
+
+
 def build_macro(report: Report, latest: int) -> dict:
     """BEA NIPA Table 1.12 series used by the engine and tax mode.
 
@@ -374,6 +399,7 @@ def build_macro(report: Report, latest: int) -> dict:
     """
     ni, comp, wages = (bea.series(c) for c in (bea.NATIONAL_INCOME, bea.COMPENSATION, bea.WAGES))
     years = [y for y in range(FIRST_YEAR, int(wages.index.max()) + 1)]
+    agi = irs_agi(report)
     ratio = {str(y): round(float(comp[y] / wages[y]), 4) for y in years}
     if not all(1.0 < v < 1.5 for v in ratio.values()):
         report.errors.append("BEA compensation/wages ratio outside 1.0-1.5")
@@ -384,6 +410,8 @@ def build_macro(report: Report, latest: int) -> dict:
         "compToWagesYear": latest,
         "compToWages": ratio,
         "nationalIncomeMillions": {str(y): float(ni[y]) for y in years},
+        "agiMillions": {str(y): v for y, v in agi.items()},
+        "agiToNationalIncome": {str(y): round(v / float(ni[y]), 4) for y, v in agi.items()},
     }
 
 

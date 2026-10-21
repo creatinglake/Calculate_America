@@ -68,4 +68,15 @@ SOURCES = [
         "citation": "US Bureau of Economic Analysis, NIPA Table 1.12, National Income by "
                     "Type of Income.",
     },
+    {
+        "id": "irs-soi",
+        "title": "IRS Statistics of Income, Individual Income Tax Returns",
+        "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-time-series-statistical-tables",
+        "files": ["53soireppt1ar.pdf", "63inar.pdf", "80inar.pdf", "23in11si.xls", "05in01an.xls"],
+        "used_for": "Total adjusted gross income for 1953, 1963, 1980 and 2023 "
+                    "(taxable-base ratio in tax mode).",
+        "license": "Not yet verified.",
+        "citation": "Internal Revenue Service, Statistics of Income: Individual Income Tax "
+                    "Returns (1953, 1963, 1980 reports; Publication 1304 Table 1.1, 2023).",
+    },
 ]
