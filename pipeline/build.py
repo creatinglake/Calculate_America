@@ -52,7 +52,7 @@ def latest_estimated(dists: dict[int, wid.YearDist]) -> int:
 def build_us_wid(report: Report) -> dict[str, dict]:
     df = wid.load("US")
     index = wid.series(df, "inyixxi999")
-    out = {}
+    out: dict = {"index": index}
     dists = {c: wid.distribution(df, c) for c in ("ptinc", "hweal")}
     latest = latest_estimated(dists["ptinc"])
     # WID values are in constant dollars of the price index base year;
@@ -68,6 +68,7 @@ def build_us_wid(report: Report) -> dict[str, dict]:
             "country": "US", "concept": concept, "unit": "992j",
             "dollarYear": latest, "source": "wid",
         })
+    out["latest"] = latest
     # Headline check against the authors' own published series (PSZ Table B1).
     b1 = psz.share_table("TB1")
     pt = dists["ptinc"]
@@ -78,6 +79,51 @@ def build_us_wid(report: Report) -> dict[str, dict]:
                                      float(sum(pt[y].share[i] for i in group_bins("b50"))),
                                      b1[y]["Bottom 50%"]))
     return out
+
+
+def derive_thresholds(avg: np.ndarray) -> np.ndarray:
+    """Lower thresholds from bin averages alone, following WID's convention.
+
+    WID's US income thresholds equal the midpoint of adjacent bin averages
+    (within 0.04% for ptinc and diinc, 1962-2023; see VERIFICATION.md V9).
+    The bottom bin starts at 0, or at twice its average when that is negative.
+    """
+    thr = np.empty_like(avg)
+    thr[1:] = (avg[:-1] + avg[1:]) / 2
+    thr[0] = min(0.0, 2 * avg[0])
+    return thr
+
+
+def build_us_posttax(report: Report, index, dollar_year: int) -> dict:
+    """US post-tax disposable cash income from PSZ Table C4b ($2018).
+
+    Years with any blank bin (1985) are dropped, not interpolated.
+    """
+    table = psz.gperc_table("TC4b")
+    c1b = psz.share_table("TC1b")
+    scale = float(index[dollar_year] / index[2018])
+    w = np.array(WIDTH)
+    dists = {}
+    for y, avg in table.items():
+        if y < FIRST_YEAR:
+            continue
+        share = w * avg / np.dot(w, avg)
+        d = wid.YearDist(share, avg, derive_thresholds(avg))
+        report.extend(check_year(f"US cainc {y}", d.share, d.avg, d.thr))
+        dists[y] = d
+    # The bins must reproduce PSZ's own group shares (Table C1b).
+    for y in (1962, 1963, 1980, 2000, 2019):
+        report.extend(check_headline(f"US cainc {y} top 1% vs PSZ TC1b",
+                                     top_share(dists[y].share, 0.99), c1b[y]["Top 1%"]))
+        report.extend(check_headline(f"US cainc {y} bottom 50% vs PSZ TC1b",
+                                     float(sum(dists[y].share[i] for i in group_bins("b50"))),
+                                     c1b[y]["Bottom 50%"]))
+    missing = sorted(set(range(FIRST_YEAR, max(dists) + 1)) - set(dists))
+    return to_json(dists, scale, {
+        "country": "US", "concept": "cainc", "unit": "992j", "dollarYear": dollar_year,
+        "source": "psz2022", "table": "TC4b", "missingYears": missing,
+        "thresholds": "derived",
+    })
 
 
 def write(name: str, data: dict) -> None:
@@ -101,6 +147,7 @@ def print_warnings(warnings: list[str]) -> None:
 def main() -> int:
     report = Report()
     us = build_us_wid(report)
+    posttax = build_us_posttax(report, us["index"], us["latest"])
     print_warnings(report.warnings)
     if report.errors:
         for e in report.errors:
@@ -108,6 +155,7 @@ def main() -> int:
         return 1
     write("us-ptinc", us["ptinc"])
     write("us-hweal", us["hweal"])
+    write("us-cainc", posttax)
     return 0
 
 

@@ -31,3 +31,10 @@ def test_to_json_shape_and_rebasing():
     assert len(y["avg"]) == len(y["thr"]) == len(y["share"]) == 127
     assert y["avg"][1] == round((10 + 5) * 0.5)
     assert np.isclose(out["meanPerAdult"]["2020"], np.dot(WIDTH, dist().avg) * 0.5, atol=1)
+
+
+def test_derive_thresholds_midpoints_and_bottom_rule():
+    avg = np.array([50.0, 150.0, 250.0])
+    assert list(build.derive_thresholds(avg)) == [0.0, 100.0, 200.0]
+    neg = np.array([-100.0, 50.0])
+    assert list(build.derive_thresholds(neg)) == [-200.0, -25.0]
