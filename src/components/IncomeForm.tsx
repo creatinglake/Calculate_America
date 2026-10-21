@@ -49,44 +49,64 @@ export function IncomeForm({ fields, onChange, compToWages, compYear }: {
   const id = useId();
   const who = fields.sharesFinances ? 'your household' : 'you';
   return (
-    <fieldset className="space-y-3">
-      <legend className="text-base font-semibold">Your yearly income</legend>
-      <div className="flex items-center gap-2 text-sm">
+    <fieldset className="m-0 border-0 p-0">
+      <legend className="panel-h"><span className="pdot" aria-hidden />Your income</legend>
+      <label className="switch field">
         <input
-          id={`${id}-share`}
           type="checkbox"
           checked={fields.sharesFinances}
           onChange={(e) => onChange({ ...fields, sharesFinances: e.target.checked })}
         />
-        <label htmlFor={`${id}-share`}>I share finances with a spouse or partner</label>
-      </div>
-      <p className="text-sm text-[var(--text-muted)]">
-        Enter amounts for {who}, before tax, in this year's dollars.
+        <span className="track" aria-hidden />
+        I share finances with a spouse or partner
+      </label>
+      <p className="hint field">
+        Enter yearly amounts for {who}, before tax, in this year's dollars.
         {fields.sharesFinances && ' We split the total equally between the two of you, as the data does.'}
       </p>
-      {LINES.map((line) => (
-        <div key={line.key}>
-          <label htmlFor={`${id}-${line.key}`} className="block text-sm font-medium">{line.label}</label>
-          <input
-            id={`${id}-${line.key}`}
-            inputMode="decimal"
-            autoComplete="off"
-            placeholder="$0"
-            value={fields[line.key]}
-            onChange={(e) => onChange({ ...fields, [line.key]: e.target.value })}
-            aria-describedby={`${id}-${line.key}-hint`}
-            aria-invalid={!Number.isFinite(parseAmount(fields[line.key]))}
-            className="mt-1 w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--bg)] px-3 py-2"
-          />
-          <p id={`${id}-${line.key}-hint`} className="mt-0.5 text-xs text-[var(--text-muted)]">{line.hint}</p>
-        </div>
-      ))}
-      <p className="text-xs text-[var(--text-muted)]">
+      {LINES.map((line) => {
+        const invalid = !Number.isFinite(parseAmount(fields[line.key]));
+        return (
+          <div key={line.key} className="field">
+            <label htmlFor={`${id}-${line.key}`}>{line.label}</label>
+            <div className="money-in" data-invalid={invalid}>
+              <span aria-hidden>$</span>
+              <input
+                id={`${id}-${line.key}`}
+                inputMode="decimal"
+                autoComplete="off"
+                placeholder="0"
+                value={fields[line.key]}
+                onChange={(e) => onChange({ ...fields, [line.key]: e.target.value })}
+                aria-describedby={`${id}-${line.key}-hint`}
+                aria-invalid={invalid}
+              />
+            </div>
+            <p id={`${id}-${line.key}-hint`} className="hint">{invalid ? 'Enter a number, like 60,000.' : line.hint}</p>
+          </div>
+        );
+      })}
+      <p className="hint">
         National income counts more than a paycheck: employer health insurance, retirement contributions and payroll
-        taxes. We scale wages up by {compToWages.toFixed(3)}, the ratio of total employee compensation to wages in {compYear}
-        (BEA). Corporate profits kept by companies aren't asked for, so your rank is approximate, give or take two or three
-        percentiles.
+        taxes. We scale wages up by {compToWages.toFixed(3)}, the ratio of total employee compensation to wages in{' '}
+        {compYear} (BEA). Corporate profits kept by companies aren't asked for, so your rank is approximate, give or take
+        two or three percentiles.
       </p>
     </fieldset>
+  );
+}
+
+/** "Your rank" bar shown in the input panel once an income is entered. */
+export function RankBar({ percentile, year }: { percentile: number; year: number }) {
+  const pctAbove = percentile >= 0.99 ? (percentile * 100).toFixed(2) : Math.round(percentile * 100).toString();
+  return (
+    <div className="rank" role="group" aria-label="Your rank">
+      <div className="rank-top">
+        <span>Your rank, {year}</span>
+        <strong>Higher than about {pctAbove}%</strong>
+      </div>
+      <div className="rank-bar" aria-hidden><span style={{ width: `${percentile * 100}%` }} /></div>
+      <p className="hint">Of adults age 20 and over. Approximate.</p>
+    </div>
   );
 }

@@ -36,19 +36,19 @@ export function ShareHistory({ file, label, other, otherLabel }: {
   for (let yv = years[0]!; yv <= years[years.length - 1]!; yv++) if (!years.includes(yv)) gaps.push(yv);
 
   const table = (
-    <table className="w-full text-sm tabular-nums">
+    <table className="data-table">
       <thead>
-        <tr className="text-left">
-          <th className="pr-3 font-medium">Year</th>
-          {GROUP_KEYS.map((k) => <th key={k} className="pr-3 font-medium">{GROUP_LABEL[k]}</th>)}
-          {otherRows && <th className="font-medium">Top 1%, {otherLabel}</th>}
+        <tr>
+          <th scope="col">Year</th>
+          {GROUP_KEYS.map((k) => <th key={k} scope="col">{GROUP_LABEL[k]}</th>)}
+          {otherRows && <th scope="col">Top 1%, {otherLabel}</th>}
         </tr>
       </thead>
       <tbody>
         {rows.map((r) => (
-          <tr key={r.year} className="border-t border-[var(--border)]">
-            <th scope="row" className="pr-3 text-left font-normal">{r.year}</th>
-            {GROUP_KEYS.map((k) => <td key={k} className="pr-3">{pct(r.g[k])}</td>)}
+          <tr key={r.year}>
+            <th scope="row">{r.year}</th>
+            {GROUP_KEYS.map((k) => <td key={k}>{pct(r.g[k])}</td>)}
             {otherRows && <td>{(() => { const o = otherRows.find((q) => q.year === r.year); return o ? pct(top1(o.g)) : '–'; })()}</td>}
           </tr>
         ))}
@@ -69,7 +69,7 @@ export function ShareHistory({ file, label, other, otherLabel }: {
         ))}
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
           <g key={t}>
-            <line x1={M.left} x2={W - M.right} y1={y(t)} y2={y(t)} stroke="var(--bg)" strokeOpacity={0.6} />
+            <line x1={M.left} x2={W - M.right} y1={y(t)} y2={y(t)} stroke="var(--surface)" strokeOpacity={0.5} />
             <text x={M.left - 6} y={y(t)} dy="0.32em" textAnchor="end" fontSize="11" fill="var(--text-muted)">{pct(t, 0)}</text>
           </g>
         ))}
@@ -80,21 +80,21 @@ export function ShareHistory({ file, label, other, otherLabel }: {
           <path d={topLine(otherRows)} fill="none" stroke="var(--text)" strokeWidth={2} strokeDasharray="5 4" />
         )}
       </svg>
-      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+      <ul className="legend-row">
         {GROUP_KEYS.map((k) => (
-          <li key={k} className="flex items-center gap-1">
-            <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: `var(--g-${k})` }} />
+          <li key={k}>
+            <span aria-hidden className="sw" style={{ background: `var(--g-${k})` }} />
             {GROUP_LABEL[k]}
           </li>
         ))}
         {otherRows && (
-          <li className="flex items-center gap-1">
+          <li>
             <svg width="20" height="6" aria-hidden><line x1="0" x2="20" y1="3" y2="3" stroke="var(--text)" strokeWidth="2" strokeDasharray="5 4" /></svg>
             Where the top 1% would start under {otherLabel}
           </li>
         )}
       </ul>
-      {gaps.length > 0 && <p className="mt-1 text-xs text-[var(--text-muted)]">No data for {gaps.join(', ')}; the chart joins the neighbouring years.</p>}
+      {gaps.length > 0 && <p className="fine">No data for {gaps.join(', ')}; the chart joins the neighbouring years.</p>}
     </ChartFrame>
   );
 }

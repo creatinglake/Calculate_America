@@ -3,17 +3,15 @@ import { useMemo, useState } from 'react';
 import { fromDataFile, groupShares, shapeOf } from '../engine';
 import { useCalculatorData } from '../app/useData';
 import { useViewState } from '../app/useViewState';
-import { EMPTY_FIELDS, IncomeForm, toAnswers, type IncomeFields } from '../components/IncomeForm';
+import { EMPTY_FIELDS, IncomeForm, RankBar, toAnswers, type IncomeFields } from '../components/IncomeForm';
 import { ResultCard } from '../components/ResultCard';
-import { PeopleIncomeBars } from '../charts/PeopleIncomeBars';
-import { StretchedChart } from '../charts/StretchedChart';
-import { ShareHistory } from '../charts/ShareHistory';
 import { ScenarioPicker } from '../components/ScenarioPicker';
 import { Switches } from '../components/Switches';
+import { PeopleIncomeBars } from '../charts/PeopleIncomeBars';
+import { ShareHistory } from '../charts/ShareHistory';
+import { StretchedChart } from '../charts/StretchedChart';
 import { calculate } from '../model/calculate';
 import { presetList, resolve, seriesFor } from '../model/scenarios';
-
-const panel = 'rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4';
 
 export function Explore() {
   const loaded = useCalculatorData();
@@ -22,84 +20,99 @@ export function Explore() {
 
   const view = useMemo(() => {
     if (loaded.status !== 'ready') return null;
-    const series = seriesFor(loaded.data, state);
+    const s = seriesFor(loaded.data, state);
+    const series = typeof s === 'string' ? loaded.data.ptinc : s;
     const resolved = resolve(loaded.data, state);
-    return { series, resolved };
+    const latest = Math.max(...series.years);
+    const shapes = resolved.ok
+      ? { today: shapeOf(resolved.today.dist), scenario: shapeOf(resolved.scenario.dist) }
+      : null;
+    const growthBase = state.scenario.kind === 'year' && series.byYear[String(state.scenario.year)]
+      ? { shape: shapeOf(fromDataFile(series, state.scenario.year)), label: String(state.scenario.year) }
+      : null;
+    return { series, resolved, latest, shapes, growthBase, todayDist: fromDataFile(series, latest) };
   }, [loaded, state]);
 
-  if (loaded.status === 'loading') return <p>Loading the data…</p>;
-  if (loaded.status === 'error') return <p role="alert">Couldn't load the data: {loaded.message}</p>;
+  const intro = (
+    <div className="intro">
+      <p className="eyebrow">Calculator</p>
+      <h1>Same size economy, divided another way</h1>
+      <p className="dek">
+        Find your place in how America divides its income today, then see what someone at that place would receive if
+        the same total were divided another way.
+      </p>
+    </div>
+  );
+
+  if (loaded.status === 'loading' || !view) return <>{intro}<p className="sub">Loading the data…</p></>;
+  if (loaded.status === 'error') return <>{intro}<p role="alert" className="alert">Couldn't load the data: {loaded.message}</p></>;
+
   const { data, macro } = loaded;
-  const series = typeof view!.series === 'string' ? data.ptinc : view!.series;
-  const resolved = view!.resolved;
-  const latest = Math.max(...series.years);
-  const answers = toAnswers(fields);
+  const { series, resolved, latest, shapes, growthBase, todayDist } = view;
   const compYear = macro.compToWagesYear;
+  const compToWages = macro.compToWages[String(compYear)]!;
+  const answers = toAnswers(fields);
   const calc = resolved.ok && answers
-    ? calculate(resolved, {
-        answers, compToWages: macro.compToWages[String(compYear)]!, cpiRatio: macro.cpi.ratio,
-        growthPenalty: state.growthPenalty,
-      })
+    ? calculate(resolved, { answers, compToWages, cpiRatio: macro.cpi.ratio, growthPenalty: state.growthPenalty })
     : null;
+  const todayLabel = resolved.ok ? String(resolved.today.year) : String(latest);
 
   return (
-    <div className="grid gap-6 md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
-      <div className="space-y-4">
-        <div className={panel}>
-          <IncomeForm fields={fields} onChange={setFields} compToWages={macro.compToWages[String(compYear)]!} compYear={compYear} />
+    <>
+      {intro}
+      <div className="layout">
+        <div className="inputs panel">
+          <div className="in-group">
+            <IncomeForm fields={fields} onChange={setFields} compToWages={compToWages} compYear={compYear} />
+            {calc && resolved.ok && <RankBar percentile={calc.percentile} year={resolved.today.year} />}
+          </div>
+          <div className="in-group">
+            <ScenarioPicker state={state} onChange={setState} years={series.years} presets={presetList(data)} today={todayDist} />
+          </div>
+          <div className="in-group">
+            <Switches state={state} onChange={setState} />
+          </div>
         </div>
-        <div className={panel}>
-          <ScenarioPicker
-            state={state} onChange={setState} years={series.years}
-            presets={presetList(data)} today={fromDataFile(series, latest)}
-          />
-        </div>
-        <div className={panel}>
-          <Switches state={state} onChange={setState} />
+        <div className="stack">
+          {!resolved.ok && <p role="alert" className="alert">{resolved.reason}</p>}
+          {resolved.ok && !calc && (
+            <p className="card">Enter your income to see where you stand and what you'd receive under this scenario.</p>
+          )}
+          {resolved.ok && calc && (
+            <ResultCard
+              calc={calc} scenarioLabel={resolved.scenario.label} todayYear={resolved.today.year}
+              cpiRatio={macro.cpi.ratio} cpiThrough={macro.cpi.through} growthPenalty={state.growthPenalty}
+              compToWages={compToWages}
+            />
+          )}
+          {resolved.ok && resolved.scenario.note && <p className="note">{resolved.scenario.note}</p>}
+          {resolved.ok && shapes && (
+            <PeopleIncomeBars
+              today={groupShares(resolved.today.dist)} scenario={groupShares(resolved.scenario.dist)}
+              todayLabel={todayLabel} scenarioLabel={resolved.scenario.label}
+            />
+          )}
+          {resolved.ok && shapes && (
+            <StretchedChart
+              today={shapes.today} scenario={shapes.scenario}
+              todayLabel={todayLabel} scenarioLabel={resolved.scenario.label}
+              dollarYear={Number(series.meta.dollarYear ?? resolved.today.year)}
+              you={calc ? calc.percentile : null}
+              growthBase={growthBase}
+            />
+          )}
+          {resolved.ok && (
+            <ShareHistory
+              file={series}
+              label={state.concept === 'post'
+                ? 'after taxes and cash transfers'
+                : state.data === 'as' ? 'Auten-Splinter, before taxes' : 'Piketty-Saez-Zucman, before taxes'}
+              other={state.concept === 'post' ? null : state.data === 'as' ? data.ptinc : data.ptincAs}
+              otherLabel={state.data === 'as' ? 'Piketty-Saez-Zucman' : 'Auten-Splinter'}
+            />
+          )}
         </div>
       </div>
-      <div className="space-y-4">
-        {!resolved.ok && <p role="alert" className={panel}>{resolved.reason}</p>}
-        {resolved.ok && !calc && (
-          <p className={panel}>Enter your income to see where you stand and what you'd receive under this scenario.</p>
-        )}
-        {resolved.ok && calc && (
-          <ResultCard
-            calc={calc} scenarioLabel={resolved.scenario.label} todayYear={resolved.today.year}
-            cpiRatio={macro.cpi.ratio} cpiThrough={macro.cpi.through} growthPenalty={state.growthPenalty}
-            compToWages={macro.compToWages[String(compYear)]!}
-          />
-        )}
-        {resolved.ok && resolved.scenario.note && <p className="text-sm text-[var(--text-muted)]">{resolved.scenario.note}</p>}
-        {resolved.ok && (
-          <StretchedChart
-            today={shapeOf(resolved.today.dist)} scenario={shapeOf(resolved.scenario.dist)}
-            todayLabel={String(resolved.today.year)} scenarioLabel={resolved.scenario.label}
-            dollarYear={Number(series.meta.dollarYear ?? resolved.today.year)}
-            you={calc ? calc.percentile : null}
-            growthBase={state.scenario.kind === 'year'
-              ? { shape: shapeOf(fromDataFile(series, state.scenario.year)), label: String(state.scenario.year) }
-              : null}
-          />
-        )}
-        {resolved.ok && state.concept === 'pre' && (
-          <ShareHistory
-            file={series}
-            label={state.data === 'as' ? 'Auten-Splinter, before taxes' : 'Piketty-Saez-Zucman, before taxes'}
-            other={state.data === 'as' ? data.ptinc : data.ptincAs}
-            otherLabel={state.data === 'as' ? 'Piketty-Saez-Zucman' : 'Auten-Splinter'}
-          />
-        )}
-        {resolved.ok && state.concept === 'post' && (
-          <ShareHistory file={series} label="after taxes and cash transfers" other={null} otherLabel="" />
-        )}
-        {resolved.ok && (
-          <PeopleIncomeBars
-            today={groupShares(resolved.today.dist)} scenario={groupShares(resolved.scenario.dist)}
-            todayLabel={String(resolved.today.year)} scenarioLabel={resolved.scenario.label}
-          />
-        )}
-      </div>
-    </div>
+    </>
   );
 }

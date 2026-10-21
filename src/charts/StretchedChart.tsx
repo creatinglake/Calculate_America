@@ -56,22 +56,22 @@ export function StretchedChart({ today, scenario, todayLabel, scenarioLabel, dol
   const fmtY = (v: number) => (growth ? pct(v, 0) : moneyShort(v));
 
   const table = (
-    <table className="w-full text-sm tabular-nums">
+    <table className="data-table">
       <thead>
-        <tr className="text-left">
-          <th className="pr-3 font-medium">Percentile</th>
-          {growth ? <th className="font-medium">Real growth since {growthBase!.label}</th> : <>
-            <th className="pr-3 font-medium">{todayLabel}</th>
-            <th className="font-medium">{scenarioLabel}, same average</th>
+        <tr>
+          <th scope="col">Percentile</th>
+          {growth ? <th scope="col">Real growth since {growthBase!.label}</th> : <>
+            <th scope="col">{todayLabel}</th>
+            <th scope="col">{scenarioLabel}, same average</th>
           </>}
         </tr>
       </thead>
       <tbody>
         {TABLE_P.map((p) => (
-          <tr key={p} className="border-t border-[var(--border)]">
-            <th scope="row" className="pr-3 text-left font-normal">{percentileLabel(p)}</th>
+          <tr key={p}>
+            <th scope="row">{percentileLabel(p)}</th>
             {growth ? <td>{pct(today.Q.q(p) / growthBase!.shape.Q.q(p) - 1, 0)}</td> : <>
-              <td className="pr-3">{money(today.Q.q(p))}</td>
+              <td>{money(today.Q.q(p))}</td>
               <td>{money(cf(p))}</td>
             </>}
           </tr>
@@ -87,31 +87,31 @@ export function StretchedChart({ today, scenario, todayLabel, scenarioLabel, dol
         ? `How much each percentile's income grew after inflation since ${growthBase!.label}.`
         : `Each band on the axis is ten times smaller than the one before it, so the top groups get room. ${dollarYear} dollars.`}
       table={table}
-    >
-      <div className="mb-2 flex flex-wrap gap-2 text-sm">
-        <div role="radiogroup" aria-label="Chart view" className="inline-flex overflow-hidden rounded-full border border-[var(--border)]">
-          <button type="button" role="radio" aria-checked={view === 'income'} onClick={() => setView('income')} className="px-3 py-1 aria-checked:bg-[var(--accent)] aria-checked:text-[var(--accent-text)]">Income</button>
-          <button type="button" role="radio" aria-checked={view === 'growth'} disabled={!growthBase} onClick={() => setView('growth')} className="px-3 py-1 aria-checked:bg-[var(--accent)] aria-checked:text-[var(--accent-text)] disabled:opacity-50">Growth{growthBase ? ` since ${growthBase.label}` : ''}</button>
+      tools={<>
+        <div role="radiogroup" aria-label="Chart view" className="pill-opts">
+          <button type="button" role="radio" aria-checked={view === 'income'} onClick={() => setView('income')}>Income</button>
+          <button type="button" role="radio" aria-checked={view === 'growth'} disabled={!growthBase} onClick={() => setView('growth')}>Growth{growthBase ? ` since ${growthBase.label}` : ''}</button>
         </div>
         {!growth && (
-          <label className="flex items-center gap-1">
+          <label className="check">
             <input type="checkbox" checked={logScale} onChange={(e) => setLogScale(e.target.checked)} /> Log scale
           </label>
         )}
-      </div>
+      </>}
+    >
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-labelledby={`${id}-desc`}>
         <desc id={`${id}-desc`}>
           {growth ? 'Line chart of real income growth by percentile.' : `Line chart of income by percentile for ${todayLabel} and ${scenarioLabel}.`} The data table below has the values.
         </desc>
         {BANDS.map((b, i) => (
           <g key={b.label}>
-            {i % 2 === 1 && <rect x={x(i)} y={M.top} width={x(i + 1) - x(i)} height={H - M.top - M.bottom} fill="var(--surface-2)" />}
+            {i % 2 === 1 && <rect x={x(i)} y={M.top} width={x(i + 1) - x(i)} height={H - M.top - M.bottom} fill="var(--band)" />}
             <text x={(x(i) + x(i + 1)) / 2} y={H - 4} textAnchor="middle" fontSize="11" fill="var(--text-muted)">{b.label}</text>
           </g>
         ))}
         {yTicks.map((t) => (
           <g key={t}>
-            <line x1={M.left} x2={W - M.right} y1={y(t)} y2={y(t)} stroke="var(--border)" />
+            <line x1={M.left} x2={W - M.right} y1={y(t)} y2={y(t)} stroke="var(--gridline)" />
             <text x={M.left - 6} y={y(t)} dy="0.32em" textAnchor="end" fontSize="11" fill="var(--text-muted)">{fmtY(t)}</text>
           </g>
         ))}
@@ -121,7 +121,7 @@ export function StretchedChart({ today, scenario, todayLabel, scenarioLabel, dol
         {growth && <line x1={M.left} x2={W - M.right} y1={y(0)} y2={y(0)} stroke="var(--text-muted)" />}
         {series.map((s, i) => (
           <path key={s.key} d={path(s.values)} fill="none" strokeWidth={2.5}
-            stroke={i === 0 ? 'var(--accent)' : 'var(--positive)'} strokeDasharray={i === 1 ? '6 4' : undefined} />
+            stroke={i === 0 ? 'var(--line-now)' : 'var(--line-base)'} strokeDasharray={i === 1 ? '6 4' : undefined} />
         ))}
         {you !== null && !growth && (
           <g>
@@ -130,10 +130,10 @@ export function StretchedChart({ today, scenario, todayLabel, scenarioLabel, dol
           </g>
         )}
       </svg>
-      <ul className="mt-1 flex flex-wrap gap-x-4 text-xs">
+      <ul className="legend-row">
         {series.map((s, i) => (
-          <li key={s.key} className="flex items-center gap-1">
-            <svg width="20" height="6" aria-hidden><line x1="0" x2="20" y1="3" y2="3" strokeWidth="2.5" stroke={i === 0 ? 'var(--accent)' : 'var(--positive)'} strokeDasharray={i === 1 ? '6 4' : undefined} /></svg>
+          <li key={s.key}>
+            <svg width="20" height="6" aria-hidden><line x1="0" x2="20" y1="3" y2="3" strokeWidth="2.5" stroke={i === 0 ? 'var(--line-now)' : 'var(--line-base)'} strokeDasharray={i === 1 ? '6 4' : undefined} /></svg>
             {s.label}
           </li>
         ))}

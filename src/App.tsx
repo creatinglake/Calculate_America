@@ -3,8 +3,9 @@ import { Link, useLocation, useScrollTopOnNavigate } from './app/router';
 import { useTheme } from './app/theme';
 import { Explore } from './pages/Explore';
 
-// Shell with placeholder pages. Real pages arrive in Phase 4 onward, styled
-// after the design direction Adam picks.
+const NAV = ['/', '/explore/', '/top/', '/methods/', '/sources/', '/about/'] as const;
+
+// Pages other than the calculator are placeholders until their phases.
 export function App() {
   const { path } = useLocation();
   useScrollTopOnNavigate(path);
@@ -12,33 +13,48 @@ export function App() {
   const route = ROUTES.find((r) => r.path === matchRoute(path));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <header className="mb-8">
-        <p className="text-sm uppercase tracking-wide text-neutral-500">Calculate America</p>
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-3xl font-semibold">Fair Share</p>
-          <button type="button" onClick={toggleTheme} className="rounded border px-3 py-1 text-sm">
+    <>
+      <header className="site">
+        <div className="site-inner">
+          <Link href="/" className="brand">
+            <span className="mark" aria-hidden>
+              <svg viewBox="0 0 20 20"><rect x="2" y="11" width="4" height="7" rx="1" /><rect x="8" y="7" width="4" height="11" rx="1" /><rect x="14" y="2" width="4" height="16" rx="1" /></svg>
+            </span>
+            <span className="brand-text">
+              <span className="brand-tool">Fair Share</span>
+              <span className="brand-org">Calculate America</span>
+            </span>
+          </Link>
+          <nav aria-label="Main">
+            <ul>
+              {NAV.map((p) => {
+                const r = ROUTES.find((x) => x.path === p)!;
+                return (
+                  <li key={p}>
+                    <Link href={p} aria-current={r === route ? 'page' : undefined}>{p === '/explore/' ? 'Calculator' : r.title}</Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+          <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
             {theme === 'dark' ? 'Light mode' : 'Dark mode'}
           </button>
         </div>
-        <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          {ROUTES.map((r) => (
-            <Link key={r.path} href={r.path} className="underline" aria-current={r === route ? 'page' : undefined}>
-              {r.title}
-            </Link>
-          ))}
-        </nav>
       </header>
-      <main>
-        <h1 className="mb-4 text-2xl font-semibold">{route ? route.title : 'Page not found'}</h1>
+      <main className="page">
         {route?.path === '/explore/' ? (
           <Explore />
         ) : (
-          <p className="mt-2 text-[var(--text-muted)]">
-            {route ? 'Under construction.' : 'There is no page at this address.'}
-          </p>
+          <div className="intro">
+            <h1>{route ? route.title : 'Page not found'}</h1>
+            <p className="dek">{route ? 'This page is coming soon.' : 'There is no page at this address.'}</p>
+          </div>
         )}
       </main>
-    </div>
+      <footer className="site-foot">
+        <p>Fair Share is a Calculate America tool. Data: World Inequality Database, Piketty, Saez and Zucman; Auten and Splinter; BEA; BLS; IRS. See Sources.</p>
+      </footer>
+    </>
   );
 }
