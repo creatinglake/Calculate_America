@@ -308,11 +308,12 @@ export function Methods() {
         <Section id="custom-h" title="Custom divisions">
           <p className="sub">
             <strong>Group sliders:</strong> moving one slider takes from or gives to the others in proportion to their
-            shares, so the total stays 100%. The result keeps today's shape inside groups, scaled by a factor that changes
-            smoothly with rank (straight-line pieces joined at the group edges), chosen as the smoothest such factor that
-            makes every group's share exactly what you set. Scaling each group by one number would leave jumps at the group
-            edges. Edge incomes are then set at the midpoints of neighbouring averages. If a lower group would have more per
-            person than a higher one, or the result would not rise steadily from bottom to top, the setting is refused.
+            shares, so the total stays 100%. Each group's incomes are scaled by one number so its share is exactly what you
+            set, keeping today's shape inside the group. If that would leave the top of one group with more than the
+            bottom of the group above, the scaling inside those groups tilts, as little as possible, so incomes still
+            rise from bottom to top: the factor becomes a straight line in rank within each group, with the least total
+            slope that keeps the order. Edge incomes are then set at the midpoints of neighbouring averages. If a lower
+            group would have more per person than a higher one, or the result would not rise steadily from bottom to top, the setting is refused.
           </p>
           <p className="sub"><strong>Blend:</strong> two divisions mixed at weight t, each scaled to its own average:</p>
           <Formula>Q(p) = [(1 − t) · Q_A(p) ÷ average_A + t · Q_B(p) ÷ average_B] × today's average</Formula>
@@ -332,7 +333,8 @@ export function Methods() {
           </p>
           <p className="sub">
             Auten and Splinter publish group shares, not 127 groups. We take the Piketty-Saez-Zucman shape for each year and
-            rescale it smoothly (as for the group sliders) so the six groups match Auten and Splinter's shares of pre-tax
+            rescale it with a factor that changes smoothly with rank (straight-line pieces joined at the group edges, the
+            smoothest such factor) so the six groups match Auten and Splinter's shares of pre-tax
             national income. Their groups contain equal numbers of all individuals, including children, ranked by tax-unit
             income divided by the square root of the number of people in the unit, which is close to, but not the same as,
             our unit. Their after-tax measure includes benefits like Medicare, so the switch applies to income before taxes
