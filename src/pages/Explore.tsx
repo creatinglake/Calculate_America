@@ -1,6 +1,6 @@
 /** /explore: the calculator (plan 6.1). */
 import { useMemo, useState } from 'react';
-import { fromDataFile, groupShares, shapeOf } from '../engine';
+import { fromDataFile, gini, groupShares, shapeOf } from '../engine';
 import { useCalculatorData } from '../app/useData';
 import { useViewState } from '../app/useViewState';
 import { EMPTY_FIELDS, IncomeForm, RankBar, toAnswers, type IncomeFields } from '../components/IncomeForm';
@@ -68,7 +68,10 @@ export function Explore() {
             {calc && resolved.ok && <RankBar percentile={calc.percentile} year={resolved.today.year} />}
           </div>
           <div className="in-group">
-            <ScenarioPicker state={state} onChange={setState} years={series.years} presets={presetList(data)} today={todayDist} />
+            <ScenarioPicker
+              state={state} onChange={setState} years={series.years} presets={presetList(data)} today={todayDist}
+              scenarioDist={resolved.ok ? resolved.scenario.dist : null} cpiRatio={macro.cpi.ratio}
+            />
           </div>
           <div className="in-group">
             <Switches state={state} onChange={setState} />
@@ -91,6 +94,7 @@ export function Explore() {
             <PeopleIncomeBars
               today={groupShares(resolved.today.dist)} scenario={groupShares(resolved.scenario.dist)}
               todayLabel={todayLabel} scenarioLabel={resolved.scenario.label}
+              gini={{ today: gini(resolved.today.dist), scenario: gini(resolved.scenario.dist) }}
             />
           )}
           {resolved.ok && shapes && (
