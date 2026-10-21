@@ -6,6 +6,19 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 
 ---
 
+## Open items (as of 2026-10-21)
+Resolved since this list was started: NIPA factor (V15), AS files (V11), DFA format and latest quarter (V13), latest `hweal` year (V14), PSZ effective tax rates (V16), 1928 top shares (presets.json, built and validated).
+- **Needs Adam:** `Simple_1963_2024_Calculator_12-03-2025.xlsx` for the CPS regression test and the 1963 weighted-total check (about 60M, against IPUMS sample notes).
+- **Needs Adam:** Tax Foundation historical brackets spreadsheet (the page's "Download Data" button has no direct link). Needed for tax mode (Phase 6).
+- **Needs a decision:** AGI source for the taxable-base ratio (V17).
+- **Needs a decision:** WID license (V8): CC BY-NC-SA 4.0 on charts; bulk terms unconfirmed.
+- Current-law 2025/2026 federal brackets from IRS (Phase 6).
+- DFA and BEA reuse terms.
+- Spot check of the site's 1963 and 2023 top 1% / bottom 50% against WID's own website (before launch).
+- Norton and Ariely 2011 quintile figures (wealth mode, Phase 7).
+
+---
+
 ## V1. WID variable code spelling — OK
 - Checked: `WID_data_US.csv` from https://wid.world/bulk_download/WID_data_US.csv (Last-Modified 15 Oct 2026, retrieved 2026-10-20).
 - The bulk files write concept + population letter + age: `sptincj992`. The plan and the WID codes dictionary write the API form `sptinc992j`. They are the same series. The pipeline uses the bulk spelling.
@@ -40,7 +53,7 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 - WID `sdiincj992` `p99p100`: 1960 9.14%, 2019 15.11%. Matches TPC's 9% → 15%.
 - The plan's 0.5-point check against TPC's rounded "13%" fails by 0.07 for 1960 only because of TPC's rounding, so the build check compares against PSZ Table B1 directly (top 1% and bottom 50%, 1962, 1963, 1980, 2000, 2019, tolerance 0.5 points). All pass.
 
-## V7. Comparison countries — PARTIAL
+## V7. Comparison countries — OK
 - Downloaded `WID_data_{SE,DK,NO,FI,FR,DE,GB}.csv` (Last-Modified 15 Oct 2026) and `WID_data_QX.csv` (Last-Modified 7 Aug 2025).
 - `QX` is **Western Europe**. It is not listed in `WID_countries.csv` but its bulk file exists and `WID_metadata_QX.csv` names it "Western Europe". (`OC` is "Other Western Europe", a residual, not used.)
 - 127-bin coverage (s, a, t all present):
@@ -56,7 +69,8 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 | GB | 1820–2024 | 1980–2024 | 1980–2022 | ptinc 1981, 2020, 2024 |
 | QX | 1980–2023 | 1980–2023 | none | none |
 
-- Implication per the plan: post-tax comparison is disabled for France (no recent `cainc`) and Western Europe (no `cainc`). Still to do: build and validate these files.
+- Implication per the plan: post-tax comparison is disabled for France (no recent `cainc`) and Western Europe (no `cainc`).
+- Built `comparisons.json`: pre-tax 2023 for all eight areas (2024 is a carried-forward copy, as in the US), post-tax 2022 for SE, DK, NO, FI, DE, GB. All pass validation; DE and GB have one negative bottom bin each (warning).
 
 ## V8. WID license — PARTIAL
 - No terms-of-use page found on wid.world (`/terms-of-use/` returns 404; no license wording on `/data/`, `/methodology/`, `/graphs-faq/`).
@@ -64,17 +78,6 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 - Not found: a statement that the bulk data files carry the same license. Open question for Adam (non-commercial and share-alike implications). Possible confirmation: stats@wid.world.
 
 ---
-
-## Open VERIFY items (not yet checked)
-- NIPA compensation-to-wages factor (BEA NIPA Table 1.12).
-- Auten-Splinter files: which is current, groups and years.
-- DFA download format and latest quarter; latest `hweal` year (2023 estimated, see V3).
-- PSZ effective tax rates by group: table and groups.
-- Current-law 2025/2026 federal brackets (IRS).
-- Historical brackets (Tax Foundation, IRS SOI); SOI total AGI and BEA national income for the taxable-base ratio.
-- Gilded Age 1928 top shares non-blank (WID `ptinc` 1928 is present: top 1% 22.29%; still to validate as a preset).
-- CPS 1963 file weighted total (about 60M): needs the spreadsheet and IPUMS sample notes.
-- Spot check against WID's own website for 1963 and 2023 (top 1%, bottom 50%).
 
 ## V9. WID thresholds are midpoints of adjacent bin averages — OK
 - For US `ptinc` and `diinc`, 1962–2023, every `t…j992` threshold above the bottom bin equals the arithmetic mean of the two adjacent bin averages (`a…j992`), within 0.04% (ptinc) and 0.006% (diinc). The geometric mean misses by up to 17%.
