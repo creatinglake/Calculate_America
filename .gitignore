@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Pipeline raw downloads (large; hashes recorded in public/data/manifest.json)
+pipeline/raw/
+__pycache__/
+.venv/
+
+# Playwright
+test-results/
+playwright-report/
