@@ -147,3 +147,9 @@ Resolved: NIPA factor (V15), AS files (V11), DFA format and latest quarter (V13)
 - Cross-check against IRS SOI Historical Table 23 (https://www.irs.gov/pub/irs-soi/histab23.xls, 1913–2018), lowest and highest bracket rates: 19 years differ (1923–31, 1946–50, 1968–70, 1981, 2001). Each is a year with across-the-board reductions, surtaxes or credits that IRS folds into its reported rate and Tax Foundation describes in a note (e.g. 1968–70 Vietnam surtax). **1953 (22.2%–92%), 1963 (20%–91%) and 1980 (14%–70%) agree.** The build fails if any featured year disagrees; every year carries an `irsRatesAgree` flag.
 - Personal exemptions from Table 23: 1953 and 1963 $600 single / $1,200 married; 1980 $1,000 / $2,000.
 - For Phase 6: 1977–1986 schedules start with a 0% bracket (the "zero bracket amount", i.e. the standard deduction built into the schedule), so the standard deduction must not be subtracted again for 1980. 1953 rates include normal tax plus surtax per the Tax Foundation note. Standard deduction amounts and current-law 2025/2026 schedules still to verify against IRS.
+
+## V20. CPI-U for converting user income — OK
+- Source: BLS public API, series `CUUR0000SA0` (CPI-U, all items, US city average, not seasonally adjusted), https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0, retrieved 2026-10-21. Latest month September 2026.
+- 2023 annual average 304.702. October 2025 is "-" with the BLS footnote "Data unavailable due to the 2025 lapse in appropriations"; it is left out, not filled in.
+- Ratio used by the engine: average of the available months October 2025–September 2026 (11 months, 330.760) ÷ 2023 average = 1.0855. A user's income entered in today's dollars is divided by this to compare with the data (2023 dollars). Stored in `us-macro.json` under `cpi`.
+- Method choice (latest 12 months rather than a single month) is recorded here for the methods page.
