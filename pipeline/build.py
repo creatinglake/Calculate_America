@@ -176,6 +176,59 @@ def build_comparisons(report: Report) -> dict:
             "areas": areas}
 
 
+GROUP_ORDER = ["b50", "m40", "u9", "t09", "t009", "t001"]
+GROUP_POP = {"b50": 0.5, "m40": 0.4, "u9": 0.09, "t09": 0.009, "t009": 0.0009, "t001": 0.0001}
+
+
+def group_shares(share: np.ndarray) -> dict[str, float]:
+    return {g: float(sum(share[i] for i in group_bins(g))) for g in GROUP_ORDER}
+
+
+def per_person_order_ok(groups: dict[str, float]) -> bool:
+    """Each group earns more per person than the group below it."""
+    per = [groups[g] / GROUP_POP[g] for g in GROUP_ORDER]
+    return all(a < b for a, b in zip(per, per[1:]))
+
+
+def gilded_age(top10: float, top1: float, top01: float, top001: float,
+               b50_fraction_of_b90: float) -> dict[str, float]:
+    """Six group shares from top shares, splitting the bottom 90% by a ratio."""
+    b90 = 1 - top10
+    return {
+        "b50": b90 * b50_fraction_of_b90,
+        "m40": b90 * (1 - b50_fraction_of_b90),
+        "u9": top10 - top1,
+        "t09": top1 - top01,
+        "t009": top01 - top001,
+        "t001": top001,
+    }
+
+
+def build_gilded_age(report: Report) -> dict:
+    """US 1928 preset (FAIRSHARE_PLAN.md 5): observed top shares, bottom 90%
+    split with the 1962 b50:m40 ratio, and a range at that ratio +/-25%."""
+    df = wid.load("US")
+    top = {p: wid.series(df, "sptincj992", p).get(1928)
+           for p in ("p90p100", "p99p100", "p99.9p100", "p99.99p100")}
+    if any(v is None or np.isnan(v) for v in top.values()):
+        report.errors.append(f"Gilded Age: blank 1928 top share {top}")
+        return {}
+    g1962 = group_shares(wid.distribution(df, "ptinc")[1962].share)
+    ratio = g1962["b50"] / g1962["m40"]
+    variants = {}
+    for name, r in (("central", ratio), ("low", ratio * 0.75), ("high", ratio * 1.25)):
+        groups = gilded_age(*top.values(), r / (1 + r))
+        if not per_person_order_ok(groups):
+            report.errors.append(f"Gilded Age {name}: a lower group earns more per person")
+        variants[name] = {g: round(v, 6) for g, v in groups.items()}
+    return {
+        "id": "gilded-age-1928", "year": 1928, "source": "wid",
+        "observed": ["p90p100", "p99p100", "p99.9p100", "p99.99p100"],
+        "b50ToM40Ratio1962": round(ratio, 6),
+        "groups": variants,
+    }
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -199,6 +252,7 @@ def main() -> int:
     us = build_us_wid(report)
     posttax = build_us_posttax(report, us["index"], us["latest"])
     comparisons = build_comparisons(report)
+    presets = {"gildedAge": build_gilded_age(report)}
     print_warnings(report.warnings)
     if report.errors:
         for e in report.errors:
@@ -208,6 +262,7 @@ def main() -> int:
     write("us-hweal", us["hweal"])
     write("us-cainc", posttax)
     write("comparisons", comparisons)
+    write("presets", presets)
     return 0
 
 
