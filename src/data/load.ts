@@ -79,16 +79,23 @@ export interface TaxBrackets {
   };
 }
 
+export interface DfaWealth {
+  meta: Record<string, unknown>;
+  quarters: string[];
+  shares: Record<'b50' | 'm40' | 'u9' | 't09' | 'top01', number[]>;
+}
+
 export interface DataFiles {
   'us-ptinc': DataFile;
   'us-cainc': DataFile;
   'us-ptinc-as': DataFile;
-  'us-hweal': DataFile;
   comparisons: Comparisons;
   presets: Presets;
   'us-macro': Macro;
   'us-tax-effective': TaxEffective;
   'us-tax-brackets': TaxBrackets;
+  'us-hweal': DataFile;
+  'us-dfa-wealth': DfaWealth;
 }
 
 const cache = new Map<string, Promise<unknown>>();
