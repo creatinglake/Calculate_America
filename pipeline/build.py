@@ -232,6 +232,26 @@ def build_gilded_age(report: Report) -> dict:
     }
 
 
+def build_manifest(report: Report) -> dict:
+    """Every source with its files' URL, size, SHA-256 and retrieval date."""
+    from common import FETCH_LOG
+    from sources import SOURCES
+
+    log = json.loads(FETCH_LOG.read_text())
+    out = []
+    for src in SOURCES:
+        files = []
+        for name in src["files"]:
+            rec = log.get(name)
+            if rec is None:
+                report.errors.append(f"manifest: {name} not in fetch log; run the fetch script")
+                continue
+            files.append({k: rec[k] for k in
+                          ("file", "url", "bytes", "sha256", "retrieved", "last_modified")})
+        out.append({k: v for k, v in src.items() if k != "files"} | {"files": files})
+    return {"sources": out}
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -256,6 +276,7 @@ def main() -> int:
     posttax = build_us_posttax(report, us["index"], us["latest"])
     comparisons = build_comparisons(report)
     presets = {"gildedAge": build_gilded_age(report)}
+    manifest = build_manifest(report)
     print_warnings(report.warnings)
     if report.errors:
         for e in report.errors:
@@ -266,6 +287,7 @@ def main() -> int:
     write("us-cainc", posttax)
     write("comparisons", comparisons)
     write("presets", presets)
+    write("manifest", manifest)
     return 0
 
 
