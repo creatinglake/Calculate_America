@@ -7,6 +7,7 @@ import { EMPTY_FIELDS, IncomeForm, toAnswers, type IncomeFields } from '../compo
 import { ResultCard } from '../components/ResultCard';
 import { PeopleIncomeBars } from '../charts/PeopleIncomeBars';
 import { StretchedChart } from '../charts/StretchedChart';
+import { ShareHistory } from '../charts/ShareHistory';
 import { ScenarioPicker } from '../components/ScenarioPicker';
 import { Switches } from '../components/Switches';
 import { calculate } from '../model/calculate';
@@ -80,6 +81,17 @@ export function Explore() {
               ? { shape: shapeOf(fromDataFile(series, state.scenario.year)), label: String(state.scenario.year) }
               : null}
           />
+        )}
+        {resolved.ok && state.concept === 'pre' && (
+          <ShareHistory
+            file={series}
+            label={state.data === 'as' ? 'Auten-Splinter, before taxes' : 'Piketty-Saez-Zucman, before taxes'}
+            other={state.data === 'as' ? data.ptinc : data.ptincAs}
+            otherLabel={state.data === 'as' ? 'Piketty-Saez-Zucman' : 'Auten-Splinter'}
+          />
+        )}
+        {resolved.ok && state.concept === 'post' && (
+          <ShareHistory file={series} label="after taxes and cash transfers" other={null} otherLabel="" />
         )}
         {resolved.ok && (
           <PeopleIncomeBars
