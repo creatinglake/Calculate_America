@@ -188,3 +188,10 @@ input[type='range'] { accent-color: var(--panel-accent); width: 100%; }
 .story-step.card { padding: clamp(1.25rem, 3vw, 2rem); }
 .story-h { margin: 0.25rem 0 0.5rem; font-size: clamp(1.35rem, 3.2vw, 1.85rem); line-height: 1.2; letter-spacing: -0.015em; font-weight: 700; }
 @media (max-width: 40rem) { .sg[data-small='true'] { font-size: 0; } }
+
+/* methods */
+.methods .sub { max-width: 52rem; }
+.formula { margin: 0.75rem 0; padding: 0.6rem 0.85rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 0.88rem; overflow-x: auto; }
+.toc ol { margin: 0; padding-left: 1.2rem; columns: 2 14rem; font-size: 0.9rem; }
+.toc li { margin: 0.15rem 0; }
+.toc { margin-bottom: 1.25rem; }
