@@ -48,3 +48,33 @@ export function workEquivalent(difference: number, income: number, annualHours =
 export function rankInWords(percentile: number, income: number, median: number) {
   return { percentAbove: percentile * 100, multipleOfMedian: median > 0 ? income / median : null };
 }
+
+/** Default assumptions for the income-to-wealth link (plan section 8). */
+export const DEFAULT_SAVE_RATE = 0.1;
+export const DEFAULT_REAL_RETURN = 0.03;
+
+export interface Accumulation {
+  /** Wealth at the end of the last year, in real dollars. */
+  total: number;
+  /** Total saved before returns. */
+  contributions: number;
+  byYear: { year: number; saved: number; balance: number }[];
+}
+
+/**
+ * "If your yearly income difference had been saved at rate s and earned real
+ * return r, you'd have N more." Each year's saving is added at the end of the
+ * year and earns the return in later years. Negative differences are
+ * withdrawals (less saved).
+ */
+export function accumulate(flows: { year: number; amount: number }[], saveRate: number, realReturn: number): Accumulation {
+  let balance = 0, contributions = 0;
+  const byYear: Accumulation['byYear'] = [];
+  for (const f of [...flows].sort((a, b) => a.year - b.year)) {
+    const saved = f.amount * saveRate;
+    balance = balance * (1 + realReturn) + saved;
+    contributions += saved;
+    byYear.push({ year: f.year, saved, balance });
+  }
+  return { total: balance, contributions, byYear };
+}

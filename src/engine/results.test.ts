@@ -66,3 +66,27 @@ describe('placement', () => {
     expect(() => place({ ...base, wages: NaN }, 1.2)).toThrow();
   });
 });
+
+describe('income to wealth', () => {
+  it('compounds yearly savings at the real return', async () => {
+    const { accumulate } = await import('./results');
+    const a = accumulate([{ year: 2000, amount: 1000 }, { year: 2001, amount: 1000 }], 0.1, 0.05);
+    expect(a.contributions).toBeCloseTo(200, 9);
+    expect(a.total).toBeCloseTo(100 * 1.05 + 100, 9);
+    expect(a.byYear.map((r) => r.year)).toEqual([2000, 2001]);
+  });
+
+  it('with zero return equals total saved, and order does not matter for input', async () => {
+    const { accumulate } = await import('./results');
+    const a = accumulate([{ year: 2002, amount: 500 }, { year: 2001, amount: -200 }], 0.5, 0);
+    expect(a.total).toBeCloseTo(150, 9);
+    expect(a.byYear[0]!.year).toBe(2001);
+  });
+
+  it('matches the closed form for a constant difference', async () => {
+    const { accumulate } = await import('./results');
+    const flows = Array.from({ length: 30 }, (_, i) => ({ year: 1994 + i, amount: 10_000 }));
+    const s = 0.1, r = 0.03;
+    expect(accumulate(flows, s, r).total).toBeCloseTo((s * 10_000 * ((1 + r) ** 30 - 1)) / r, 6);
+  });
+});
