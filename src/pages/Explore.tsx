@@ -1,10 +1,11 @@
 /** /explore: the calculator (plan 6.1). */
 import { useMemo, useState } from 'react';
-import { fromDataFile } from '../engine';
+import { fromDataFile, groupShares } from '../engine';
 import { useCalculatorData } from '../app/useData';
 import { useViewState } from '../app/useViewState';
 import { EMPTY_FIELDS, IncomeForm, toAnswers, type IncomeFields } from '../components/IncomeForm';
 import { ResultCard } from '../components/ResultCard';
+import { PeopleIncomeBars } from '../charts/PeopleIncomeBars';
 import { ScenarioPicker } from '../components/ScenarioPicker';
 import { Switches } from '../components/Switches';
 import { calculate } from '../model/calculate';
@@ -68,6 +69,12 @@ export function Explore() {
           />
         )}
         {resolved.ok && resolved.scenario.note && <p className="text-sm text-[var(--text-muted)]">{resolved.scenario.note}</p>}
+        {resolved.ok && (
+          <PeopleIncomeBars
+            today={groupShares(resolved.today.dist)} scenario={groupShares(resolved.scenario.dist)}
+            todayLabel={String(resolved.today.year)} scenarioLabel={resolved.scenario.label}
+          />
+        )}
       </div>
     </div>
   );
