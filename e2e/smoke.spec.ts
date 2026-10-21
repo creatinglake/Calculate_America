@@ -8,6 +8,7 @@ const HEADINGS: Record<string, string> = {
   '/taxes/': "Today's incomes, taxed another way",
   '/wealth/': 'What you own, divided another way',
   '/sources/': 'Where every number comes from',
+  '/methods/': 'How Fair Share calculates',
   '/about/': 'About Fair Share',
   '/ethics/': 'Why distribution matters',
 };

@@ -1,4 +1,5 @@
-import { ROUTES, matchRoute } from './routes';
+import { ROUTES, matchRoute, type RoutePath } from './routes';
+import type { JSX } from 'react';
 import { Link, useLocation, useScrollTopOnNavigate } from './app/router';
 import { useTheme } from './app/theme';
 import { Explore } from './pages/Explore';
@@ -9,17 +10,23 @@ import { Sources } from './pages/Sources';
 import { About } from './pages/About';
 import { Ethics } from './pages/Ethics';
 import { Story } from './pages/Story';
+import { Methods } from './pages/Methods';
 
 // The logo links to the story at /.
 const NAV = ['/explore/', '/top/', '/taxes/', '/wealth/', '/methods/', '/sources/', '/about/'] as const;
 const NAV_LABEL: Record<string, string> = { '/explore/': 'Calculator', '/top/': 'The top' };
 
-// Pages other than the calculator are placeholders until their phases.
+const PAGES: Record<RoutePath, () => JSX.Element> = {
+  '/': Story, '/explore/': Explore, '/top/': Top, '/taxes/': Taxes, '/wealth/': Wealth,
+  '/methods/': Methods, '/ethics/': Ethics, '/sources/': Sources, '/about/': About,
+};
+
 export function App() {
   const { path } = useLocation();
   useScrollTopOnNavigate(path);
   const [theme, toggleTheme] = useTheme();
   const route = ROUTES.find((r) => r.path === matchRoute(path));
+  const Page = route ? PAGES[route.path] : null;
 
   return (
     <>
@@ -52,26 +59,12 @@ export function App() {
         </div>
       </header>
       <main className="page">
-        {route?.path === '/' ? (
-          <Story />
-        ) : route?.path === '/explore/' ? (
-          <Explore />
-        ) : route?.path === '/top/' ? (
-          <Top />
-        ) : route?.path === '/taxes/' ? (
-          <Taxes />
-        ) : route?.path === '/wealth/' ? (
-          <Wealth />
-        ) : route?.path === '/sources/' ? (
-          <Sources />
-        ) : route?.path === '/about/' ? (
-          <About />
-        ) : route?.path === '/ethics/' ? (
-          <Ethics />
+        {Page ? (
+          <Page />
         ) : (
           <div className="intro">
-            <h1>{route ? route.title : 'Page not found'}</h1>
-            <p className="dek">{route ? 'This page is coming soon.' : 'There is no page at this address.'}</p>
+            <h1>Page not found</h1>
+            <p className="dek">There is no page at this address. <Link href="/">Go to the start</Link>.</p>
           </div>
         )}
       </main>
