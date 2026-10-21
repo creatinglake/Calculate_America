@@ -125,3 +125,9 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 - Check: the six rates weighted by B1 shares reproduce G1's "All" rate within 0.001 in 1962, 1980, 2000 and 2019. 1963 differs by 0.009 (0.272 vs 0.281), probably because G1's denominator includes taxable capital gains and B1's shares do not. Logged as a warning; the build fails above 0.015.
 - Examples (G1-derived): 1963 bottom 50% 22.7%, top 0.01% 55.5%; 2019 bottom 50% 26.0%, top 0.01% 35.1%.
 - Output `us-tax-effective.json`, 1962–2019.
+
+## V17. SOI total AGI by year (taxable-base ratio) — PARTIAL
+- IRS "Table 1. All Individual Income Tax Returns: Sources of Income and Tax Items, 1913–2005" (https://www.irs.gov/pub/irs-soi/05in01an.xls), column "Total income", millions of current dollars: 1953 228,708; 1962 349,484; 1963 369,675; 1980 1,642,346; 2005 7,531,892.
+- That column is **not AGI**. The table's source note cites Paris and Hilgert, "70th Year of Individual Income and Tax Statistics, 1913–1982", SOI Bulletin Winter 1983–84 (https://www.irs.gov/pub/irs-soi/13-82inintrd70yrs.pdf), which defines "total income" as positive income sources less negative amounts, built for comparability across 1913–1982. AGI also subtracts statutory adjustments.
+- SOI Bulletin Historical Table 1 (https://www.irs.gov/pub/irs-soi/histab1.xls, Last-Modified 7 Nov 2025) has AGI proper, but only for 1999–2016. In the overlap, "total income" exceeds AGI by 0.92% (2000) to 1.47% (2005).
+- Still needed: AGI for 1953, 1963, 1980 and 2023 from a consistent source, or a decision to use "total income" with a stated approximation. Needed for tax mode (Phase 6), not before.
