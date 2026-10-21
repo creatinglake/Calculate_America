@@ -13,6 +13,7 @@ import numpy as np
 import autensplinter
 import bea
 import psz
+import taxfoundation
 import wid
 from bins import P0, P1, WIDTH, group_bins
 from checks import SHARE_TOLERANCE as SHARE_TOL, Report, check_headline, check_year
@@ -390,6 +391,41 @@ def irs_agi(report: Report) -> dict[int, float]:
     return agi
 
 
+def cpi(report: Report, dollar_year: int) -> dict:
+    """CPI-U for converting a user's income (entered in today's dollars) into
+    the data's dollars: average of the latest 12 months over the dollar
+    year's annual average (plan section 2, "Real dollars")."""
+    raw = json.loads((wid.RAW / "bls" / "CUUR0000SA0.json").read_text())
+    if raw.get("status") != "REQUEST_SUCCEEDED":
+        report.errors.append(f"BLS CPI download failed: {raw.get('message')}")
+        return {}
+    rows = raw["Results"]["series"][0]["data"]
+
+    def value(r: dict) -> float | None:
+        try:
+            return float(r["value"])
+        except ValueError:  # "-": e.g. October 2025, lapse in appropriations
+            return None
+
+    annual = {int(r["year"]): value(r) for r in rows if r["period"] == "M13"}
+    monthly = {(int(r["year"]), int(r["period"][1:])): value(r)
+               for r in rows if r["period"] != "M13"}
+    y, m = max(k for k, v in monthly.items() if v is not None)
+    window = [((y * 12 + m - 1 - i) // 12, (y * 12 + m - 1 - i) % 12 + 1) for i in range(12)]
+    values = [monthly.get(k) for k in window]
+    available = [v for v in values if v is not None]
+    missing = [f"{a}-{b:02d}" for (a, b), v in zip(window, values) if v is None]
+    if len(available) < 10 or annual.get(dollar_year) is None:
+        report.errors.append("BLS CPI: too few months, or no annual average for the dollar year")
+        return {}
+    latest12 = sum(available) / len(available)
+    return {"series": "CUUR0000SA0", "dollarYear": dollar_year,
+            "dollarYearAverage": annual[dollar_year],
+            "latest12MonthAverage": round(latest12, 3),
+            "through": f"{y}-{m:02d}", "missingMonths": missing,
+            "ratio": round(latest12 / annual[dollar_year], 6)}
+
+
 def build_macro(report: Report, latest: int) -> dict:
     """BEA NIPA Table 1.12 series used by the engine and tax mode.
 
@@ -412,6 +448,7 @@ def build_macro(report: Report, latest: int) -> dict:
         "nationalIncomeMillions": {str(y): float(ni[y]) for y in years},
         "agiMillions": {str(y): v for y, v in agi.items()},
         "agiToNationalIncome": {str(y): round(v / float(ni[y]), 4) for y, v in agi.items()},
+        "cpi": cpi(report, latest),
     }
 
 
@@ -460,6 +497,66 @@ def group_shares_from_cumulative(s: dict[str, float]) -> dict[str, float]:
             "t009": s["Top 0.1%"] - s["Top 0.01%"], "t001": s["Top 0.01%"]}
 
 
+# Years whose statutory schedules tax mode offers first (plan section 7).
+TAX_YEARS = [1953, 1963, 1980]
+
+
+def irs_table23() -> dict[int, dict[str, float | None]]:
+    """IRS SOI Historical Table 23: exemptions and lowest/highest bracket rates."""
+    import re
+
+    import pandas as pd
+
+    def num(v) -> float | None:
+        txt = re.sub(r"\[[^\]]*\]", "", str(v)).replace(",", "").strip()
+        try:
+            return float(txt)
+        except ValueError:
+            return None
+
+    x = pd.read_excel(wid.RAW / "irs" / "histab23.xls", header=None)
+    out = {}
+    for i in range(len(x)):
+        y = str(x.iloc[i, 0]).split(".")[0]
+        if y.isdigit():
+            out[int(y)] = {"exemptionSingle": num(x.iloc[i, 1]),
+                           "exemptionMarried": num(x.iloc[i, 2]),
+                           "lowestRate": num(x.iloc[i, 4]), "highestRate": num(x.iloc[i, 6])}
+    return out
+
+
+def build_tax_brackets(report: Report) -> dict:
+    """Statutory federal income tax schedules (Tax Foundation), single and
+    married filing jointly, with IRS Table 23 exemptions and a cross-check of
+    each year's lowest and highest rates."""
+    tf, notes, irs = taxfoundation.schedules(), taxfoundation.notes(), irs_table23()
+    years = {}
+    for y in sorted(tf):
+        if y < 1913 or "single" not in tf[y] or "mfj" not in tf[y]:
+            continue
+        entry: dict = {st: [[round(r, 4), t] for r, t in tf[y][st]] for st in ("single", "mfj")}
+        for st in ("single", "mfj"):
+            thr = [t for _, t in tf[y][st]]
+            if thr[0] != 0 or any(b <= a for a, b in zip(thr, thr[1:])):
+                report.errors.append(f"Tax Foundation {y} {st}: thresholds not increasing from 0")
+        if y in irs and irs[y]["lowestRate"] is not None:
+            rates = [r for r, _ in tf[y]["mfj"] if r > 0]
+            agree = (abs(100 * rates[0] - irs[y]["lowestRate"]) <= 0.05
+                     and abs(100 * max(rates) - irs[y]["highestRate"]) <= 0.05)
+            entry["irsRatesAgree"] = agree
+            entry["exemption"] = {"single": irs[y]["exemptionSingle"],
+                                  "married": irs[y]["exemptionMarried"]}
+            if y in TAX_YEARS and not agree:
+                report.errors.append(f"Tax brackets {y}: Tax Foundation and IRS Table 23 differ")
+        if notes.get(y):
+            entry["note"] = notes[y]
+        years[str(y)] = entry
+    return {"meta": {"source": "taxfoundation", "check": "irs-soi Historical Table 23",
+                     "units": "rate as fraction, lower threshold of taxable income in "
+                              "current dollars"},
+            "featuredYears": TAX_YEARS, "byYear": years}
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -488,6 +585,7 @@ def main() -> int:
     dfa = build_dfa(report)
     macro = build_macro(report, us["latest"])
     eff_tax = build_effective_tax(report)
+    brackets = build_tax_brackets(report)
     manifest = build_manifest(report)
     print_warnings(report.warnings)
     if report.errors:
@@ -503,6 +601,7 @@ def main() -> int:
     write("us-dfa-wealth", dfa)
     write("us-macro", macro)
     write("us-tax-effective", eff_tax)
+    write("us-tax-brackets", brackets)
     write("manifest", manifest)
     return 0
 

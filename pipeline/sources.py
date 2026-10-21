@@ -72,11 +72,46 @@ SOURCES = [
         "id": "irs-soi",
         "title": "IRS Statistics of Income, Individual Income Tax Returns",
         "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-time-series-statistical-tables",
-        "files": ["53soireppt1ar.pdf", "63inar.pdf", "80inar.pdf", "23in11si.xls", "05in01an.xls"],
+        "files": ["53soireppt1ar.pdf", "63inar.pdf", "80inar.pdf", "23in11si.xls", "05in01an.xls",
+                  "histab23.xls"],
         "used_for": "Total adjusted gross income for 1953, 1963, 1980 and 2023 "
                     "(taxable-base ratio in tax mode).",
         "license": "Not yet verified.",
         "citation": "Internal Revenue Service, Statistics of Income: Individual Income Tax "
                     "Returns (1953, 1963, 1980 reports; Publication 1304 Table 1.1, 2023).",
+    },
+    {
+        "id": "ipums-cps",
+        "title": "IPUMS CPS, Annual Social and Economic Supplement (survey years 1963 and 2024)",
+        "url": "https://cps.ipums.org/",
+        "files": [],
+        "used_for": "Methods-page panel only (survey vs tax data at the top) and a "
+                    "regression test. Aggregates only; microdata is not published.",
+        "license": "IPUMS terms of use: no redistribution of microdata; cite IPUMS.",
+        "citation": "IPUMS CPS, University of Minnesota, www.ipums.org. Extract version "
+                    "to confirm with Adam (VERIFICATION.md V18).",
+    },
+    {
+        "id": "taxfoundation",
+        "title": "Tax Foundation, Historical U.S. Federal Individual Income Tax Rates "
+                 "and Brackets, 1862-2025",
+        "url": "https://taxfoundation.org/data/all/federal/historical-income-tax-rates-brackets/",
+        "files": [],
+        "used_for": "Statutory federal income tax schedules (tax mode).",
+        "license": "Not yet verified.",
+        "citation": "Tax Foundation, Historical U.S. Federal Individual Income Tax Rates "
+                    "& Brackets, 1862-2025. Downloaded by Adam Lake, October 2026.",
+    },
+    {
+        "id": "bls-cpi",
+        "title": "US Bureau of Labor Statistics, Consumer Price Index for All Urban "
+                 "Consumers (CPI-U), series CUUR0000SA0",
+        "url": "https://www.bls.gov/cpi/",
+        "files": ["CUUR0000SA0.json"],
+        "used_for": "Converting the income a user enters (today's dollars) into the "
+                    "data's dollars.",
+        "license": "Not yet verified.",
+        "citation": "US Bureau of Labor Statistics, CPI-U, all items, US city average, "
+                    "not seasonally adjusted.",
     },
 ]

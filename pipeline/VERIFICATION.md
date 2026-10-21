@@ -7,12 +7,10 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 ---
 
 ## Open items (as of 2026-10-21)
-Resolved since this list was started: NIPA factor (V15), AS files (V11), DFA format and latest quarter (V13), latest `hweal` year (V14), PSZ effective tax rates (V16), 1928 top shares (presets.json, built and validated), AGI (V17).
-- CPS regression test and the 1963 weighted-total check (about 60M, against IPUMS sample notes). Adam supplied the spreadsheet on 2026-10-21 (`pipeline/raw/inputs/`, never committed: IPUMS microdata).
-- Tax Foundation historical brackets: Adam supplied `Historical Income Tax Rates and Brackets, 1862-2025.csv` on 2026-10-21; still to ingest and cross-check against IRS (Phase 6).
-- WID license (V8): Adam confirmed on 2026-10-21 that the site is non-commercial (no ads). CC BY-NC-SA 4.0 is acceptable; derived data files must carry the same license and attribution.
-- Current-law 2025/2026 federal brackets from IRS (Phase 6).
-- DFA and BEA reuse terms.
+Resolved: NIPA factor (V15), AS files (V11), DFA format and latest quarter (V13), latest `hweal` year (V14), PSZ effective tax rates (V16), 1928 top shares (presets.json), AGI (V17), CPS regression test (V18), historical brackets for 1953/1963/1980 (V19), WID license accepted (V8: site is non-commercial).
+- **Ask Adam:** IPUMS CPS extract details: version (for the citation), whether 1963 weights include IPUMS's 1.3262 adjustment, and which records were dropped (V18).
+- Current-law 2025/2026 federal brackets and standard deductions from IRS; historical standard deductions (Phase 6).
+- Reuse terms for DFA, BEA, IRS and Tax Foundation data.
 - Spot check of the site's 1963 and 2023 top 1% / bottom 50% against WID's own website (before launch).
 - Norton and Ariely 2011 quintile figures (wealth mode, Phase 7).
 
@@ -136,3 +134,22 @@ Resolved since this list was started: NIPA factor (V15), AS files (V11), DFA for
   - 1980: 1,613,731,497. *Statistics of Income 1980, Individual Income Tax Returns* (https://www.irs.gov/pub/irs-soi/80inar.pdf), Table A; same in four tables.
   - 2023: 15,286,017,359. Publication 1304 Table 1.1, tax year 2023 (https://www.irs.gov/pub/irs-soi/23in11si.xls, Last-Modified 26 Mar 2026). The build reads this file and checks the CSV against it. (Table 4.1's 15,196,869 million excludes dependent filers.)
 - AGI ÷ BEA national income (`A032RC`): 1953 0.665, 1963 0.652, 1980 0.667, 2023 0.659. Stored in `us-macro.json`.
+
+## V18. CPS spreadsheet: regression test and survey panel — PARTIAL
+- File: `Simple 1963 2024 Calculator 12-03-2025.xlsx` (Adam, IPUMS CPS ASEC, ASECWT and INCTOT), kept in `pipeline/raw/inputs/`, never committed. Sheets "1963" (25,933 records) and "2024" (102,330), all with INCTOT > 0, no 999999999/999999998 codes present.
+- Method read from the workbook formulas and reimplemented in `pipeline/cps.py`. `tests/test_cps.py` reproduces the workbook's percentile (0.8309525), ratio of mean income per earner (17.801552) and result ($110,369.62) to 1e-12, and the plan's headline: $100,000 in income year 2023 → 83.1st percentile → $110,370. Skipped in CI (file absent).
+- Survey vs tax data (`public/data/cps-panel.json`): CPS 2024 (income 2023) top 1% share 10.50%, top 0.1% 1.91%, maximum income $2,108,379 (plan's figures confirmed). WID 2023: 20.74% and 9.95%. CPS 1963 (income 1962): top 1% 6.77%, top 0.1% 1.33%, maximum $76,000; WID 1962: 12.85% and 4.37%.
+- 1963 weighted total: 60,294,401 persons with positive income. IPUMS sample notes (https://cps.ipums.org/cps/sample_notes.shtml, read 2026-10-21): the original 1963 ASEC weights summed to about half the US population where about two-thirds was expected (no children under 14, no institutionalized population), so IPUMS multiplied all 1963 weights by 1.3262. 1,600 records in the 1963 file were truncated and coded NIU for prior-year work and earnings items. **Open:** whether Adam's extract carries the adjusted weights, and which records were dropped (zero, negative or NIU income). Don't quote the 60M figure until this is confirmed. Also need the IPUMS CPS version for the citation.
+
+## V19. Historical federal income tax brackets — OK for 1953, 1963, 1980
+- Source: Tax Foundation, "Historical Income Tax Rates and Brackets, 1862-2025" (CSV downloaded by Adam on 2026-10-21 from https://taxfoundation.org/data/all/federal/historical-income-tax-rates-brackets/; in `pipeline/raw/inputs/`, not committed). Parsed by `pipeline/taxfoundation.py`; 1913–2025, single and married filing jointly, rates and lower thresholds of taxable income.
+- Plan claims confirmed: 1963 20% to 91%, top bracket above $200,000 single / $400,000 joint; 1964 16% to 77%; 1965 14% to 70% (top above $100,000 / $200,000). Joint thresholds are exactly double single thresholds in every year 1949–1969. 1948 lists identical thresholds for both; its note says the Revenue Act of 1948 introduced income splitting, so the doubling isn't written into the 1948 schedule.
+- Cross-check against IRS SOI Historical Table 23 (https://www.irs.gov/pub/irs-soi/histab23.xls, 1913–2018), lowest and highest bracket rates: 19 years differ (1923–31, 1946–50, 1968–70, 1981, 2001). Each is a year with across-the-board reductions, surtaxes or credits that IRS folds into its reported rate and Tax Foundation describes in a note (e.g. 1968–70 Vietnam surtax). **1953 (22.2%–92%), 1963 (20%–91%) and 1980 (14%–70%) agree.** The build fails if any featured year disagrees; every year carries an `irsRatesAgree` flag.
+- Personal exemptions from Table 23: 1953 and 1963 $600 single / $1,200 married; 1980 $1,000 / $2,000.
+- For Phase 6: 1977–1986 schedules start with a 0% bracket (the "zero bracket amount", i.e. the standard deduction built into the schedule), so the standard deduction must not be subtracted again for 1980. 1953 rates include normal tax plus surtax per the Tax Foundation note. Standard deduction amounts and current-law 2025/2026 schedules still to verify against IRS.
+
+## V20. CPI-U for converting user income — OK
+- Source: BLS public API, series `CUUR0000SA0` (CPI-U, all items, US city average, not seasonally adjusted), https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0, retrieved 2026-10-21. Latest month September 2026.
+- 2023 annual average 304.702. October 2025 is "-" with the BLS footnote "Data unavailable due to the 2025 lapse in appropriations"; it is left out, not filled in.
+- Ratio used by the engine: average of the available months October 2025–September 2026 (11 months, 330.760) ÷ 2023 average = 1.0855. A user's income entered in today's dollars is divided by this to compare with the data (2023 dollars). Stored in `us-macro.json` under `cpi`.
+- Method choice (latest 12 months rather than a single month) is recorded here for the methods page.

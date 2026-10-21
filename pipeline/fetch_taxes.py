@@ -17,6 +17,7 @@ FILES = [
     "histab4.xls",     # Historical Table 4, NIPA personal income vs AGI
     "histab5.xls",     # Historical Table 5, personal income and total AGI
     "histab8.xls",     # Historical Table 8, personal income, taxable income, tax
+    "histab23.xls",    # Historical Table 23, exemptions and lowest/highest bracket rates
     "53soireppt1ar.pdf",  # Statistics of Income 1953, Part 1 (individual returns)
     "63inar.pdf",      # Statistics of Income 1963, Individual Income Tax Returns
     "80inar.pdf",      # Statistics of Income 1980, Individual Income Tax Returns
