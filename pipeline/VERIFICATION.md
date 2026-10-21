@@ -75,3 +75,16 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 - Gilded Age 1928 top shares non-blank (WID `ptinc` 1928 is present: top 1% 22.29%; still to validate as a preset).
 - CPS 1963 file weighted total (about 60M): needs the spreadsheet and IPUMS sample notes.
 - Spot check against WID's own website for 1963 and 2023 (top 1%, bottom 50%).
+
+## V9. WID thresholds are midpoints of adjacent bin averages — OK
+- For US `ptinc` and `diinc`, 1962–2023, every `t…j992` threshold above the bottom bin equals the arithmetic mean of the two adjacent bin averages (`a…j992`), within 0.04% (ptinc) and 0.006% (diinc). The geometric mean misses by up to 17%.
+- Bottom bin: threshold is 0 when the bin average is positive (`tptincj992` `p0p1` 2019 = 0), and twice the average when negative (`thwealj992` `p0p1` 2019 = −131,235, average −65,618).
+- `hweal` thresholds follow the rule less closely (up to 11% difference), so WID's published wealth thresholds are used as is.
+- Used for: PSZ Table C4b, which publishes averages only. `build.derive_thresholds` applies the same rule, so post-tax thresholds are built the way WID builds its own.
+
+## V10. US post-tax file (PSZ Table C4b) — OK
+- Source: Table C4b in https://gabriel-zucman.eu/files/PSZ2022AppendixTablesII(Distrib).xlsx (Last-Modified 6 Feb 2022), equal-split adults 20+, "$2018, national income deflator".
+- Converted to 2023 dollars with WID's `inyixxi999`[2023] / `inyixxi999`[2018]. This is WID's current deflator vintage, not necessarily the one PSZ used in 2022; the difference affects the dollar level of the post-tax series only, not its shape.
+- Averages increase in every year 1962–2019. Group shares rebuilt from the 127 bins match PSZ's own Table C1b (top 1% and bottom 50%, 1962, 1963, 1980, 2000, 2019) within 0.02 points.
+- 61 bin-years have a negative average (bottom bins): warnings, not failures.
+- Output `us-cainc.json`: 57 years, 1962–2019 without 1985 (`meta.missingYears`).
