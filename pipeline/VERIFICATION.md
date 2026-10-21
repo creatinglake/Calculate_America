@@ -129,8 +129,11 @@ Resolved since this list was started: NIPA factor (V15), AS files (V11), DFA for
 - Examples (G1-derived): 1963 bottom 50% 22.7%, top 0.01% 55.5%; 2019 bottom 50% 26.0%, top 0.01% 35.1%.
 - Output `us-tax-effective.json`, 1962–2019.
 
-## V17. SOI total AGI by year (taxable-base ratio) — PARTIAL
-- IRS "Table 1. All Individual Income Tax Returns: Sources of Income and Tax Items, 1913–2005" (https://www.irs.gov/pub/irs-soi/05in01an.xls), column "Total income", millions of current dollars: 1953 228,708; 1962 349,484; 1963 369,675; 1980 1,642,346; 2005 7,531,892.
-- That column is **not AGI**. The table's source note cites Paris and Hilgert, "70th Year of Individual Income and Tax Statistics, 1913–1982", SOI Bulletin Winter 1983–84 (https://www.irs.gov/pub/irs-soi/13-82inintrd70yrs.pdf), which defines "total income" as positive income sources less negative amounts, built for comparability across 1913–1982. AGI also subtracts statutory adjustments.
-- SOI Bulletin Historical Table 1 (https://www.irs.gov/pub/irs-soi/histab1.xls, Last-Modified 7 Nov 2025) has AGI proper, but only for 1999–2016. In the overlap, "total income" exceeds AGI by 0.92% (2000) to 1.47% (2005).
-- Still needed: AGI for 1953, 1963, 1980 and 2023 from a consistent source, or a decision to use "total income" with a stated approximation. Needed for tax mode (Phase 6), not before.
+## V17. SOI total AGI by year (taxable-base ratio) — OK
+- IRS "Table 1. All Individual Income Tax Returns: Sources of Income and Tax Items, 1913–2005" (https://www.irs.gov/pub/irs-soi/05in01an.xls) reports "Total income", which Paris and Hilgert (SOI Bulletin Winter 1983–84, https://www.irs.gov/pub/irs-soi/13-82inintrd70yrs.pdf) define as positive sources less negative amounts, not AGI. SOI Bulletin Historical Table 5 (`histab5.xls`) is AGI *per NIPA* (BEA's estimate, NIPA Table 7.19), not AGI reported on returns. Historical Table 1 (`histab1.xls`) has reported AGI for 1999–2016 only; there "total income" exceeds AGI by 0.92% (2000) to 1.47% (2005).
+- AGI less deficit, all returns, taken from the IRS annual reports (transcribed to `pipeline/manual/irs_agi.csv`, thousands of dollars):
+  - 1953: 228,708,256. *Statistics of Income 1953, Part 1* (https://www.irs.gov/pub/irs-soi/53soireppt1ar.pdf), "Adjusted gross income or deficit"; same total in several tables. Equals Table 1 "total income" (228,708 million) exactly; the build checks this.
+  - 1963: 368,778,072. *Statistics of Income 1963, Individual Income Tax Returns* (https://www.irs.gov/pub/irs-soi/63inar.pdf); the same figure appears five times, including a footnote ("$368,778,072,000"). One OCR line reads 368,728,386, an OCR error. Total AGI before deficits is $370,270,618,000 (same footnote).
+  - 1980: 1,613,731,497. *Statistics of Income 1980, Individual Income Tax Returns* (https://www.irs.gov/pub/irs-soi/80inar.pdf), Table A; same in four tables.
+  - 2023: 15,286,017,359. Publication 1304 Table 1.1, tax year 2023 (https://www.irs.gov/pub/irs-soi/23in11si.xls, Last-Modified 26 Mar 2026). The build reads this file and checks the CSV against it. (Table 4.1's 15,196,869 million excludes dependent filers.)
+- AGI ÷ BEA national income (`A032RC`): 1953 0.665, 1963 0.652, 1980 0.667, 2023 0.659. Stored in `us-macro.json`.
