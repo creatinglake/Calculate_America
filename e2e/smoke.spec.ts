@@ -53,3 +53,8 @@ test('wealth page ranks a net worth', async ({ page }) => {
   await expect(page.getByText(/Higher than about/)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your wealth under this division' })).toBeVisible();
 });
+
+test('unknown paths show a not-found page', async ({ page }) => {
+  await page.goto('/no-such-page/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Page not found');
+});
