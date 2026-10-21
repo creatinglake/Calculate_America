@@ -1,9 +1,10 @@
 /** /explore: the calculator (plan 6.1). */
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { fromDataFile, gini, groupShares, shapeOf } from '../engine';
 import { useCalculatorData } from '../app/useData';
 import { useViewState } from '../app/useViewState';
-import { EMPTY_FIELDS, IncomeForm, RankBar, toAnswers, type IncomeFields } from '../components/IncomeForm';
+import { useIncome } from '../app/income';
+import { IncomeForm, RankBar, toAnswers } from '../components/IncomeForm';
 import { PresetCard } from '../components/PresetCard';
 import { ResultCard } from '../components/ResultCard';
 import { ScenarioPicker } from '../components/ScenarioPicker';
@@ -17,7 +18,7 @@ import { presetList, resolve, seriesFor } from '../model/scenarios';
 export function Explore() {
   const loaded = useCalculatorData();
   const [state, setState] = useViewState();
-  const [fields, setFields] = useState<IncomeFields>(EMPTY_FIELDS);
+  const [fields, setFields] = useIncome();
 
   const view = useMemo(() => {
     if (loaded.status !== 'ready') return null;

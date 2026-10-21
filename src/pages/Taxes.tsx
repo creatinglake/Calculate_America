@@ -4,8 +4,9 @@ import {
   GROUP_KEYS, buildQuantile, fromDataFile, groupShares, personalTax, place, revenueMaximizingTopRate, runTaxes,
   type DataFile, type Recycle, type Status, type TaxRule,
 } from '../engine';
+import { useIncome } from '../app/income';
 import { loadData, type Macro, type TaxBrackets, type TaxEffective } from '../data/load';
-import { EMPTY_FIELDS, IncomeForm, toAnswers, type IncomeFields } from '../components/IncomeForm';
+import { IncomeForm, toAnswers } from '../components/IncomeForm';
 import { GROUP_LABEL } from '../components/ScenarioPicker';
 import { PeopleIncomeBars } from '../charts/PeopleIncomeBars';
 import { currentLawRule, customRule, effectiveRule, historicalRule, latestEffectiveYear, type Indexing } from '../model/taxRules';
@@ -46,7 +47,7 @@ function Seg<T extends string>({ label, value, options, onChange }: { label: str
 export function Taxes() {
   const id = useId();
   const { data, error } = useLoaded();
-  const [fields, setFields] = useState<IncomeFields>(EMPTY_FIELDS);
+  const [fields, setFields] = useIncome();
   const [mode, setMode] = useState<Mode>('effective');
   const [effYear, setEffYear] = useState(1963);
   const [statYear, setStatYear] = useState(1963);
