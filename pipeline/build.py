@@ -11,6 +11,7 @@ import sys
 import numpy as np
 
 import autensplinter
+import bea
 import psz
 import wid
 from bins import P0, P1, WIDTH, group_bins
@@ -364,6 +365,28 @@ def build_dfa(report: Report) -> dict:
     }
 
 
+def build_macro(report: Report, latest: int) -> dict:
+    """BEA NIPA Table 1.12 series used by the engine and tax mode.
+
+    compToWages: compensation of employees / wages and salaries, applied to
+    the wage line of the user's income (plan section 2).
+    nationalIncome: current dollars, millions, for the taxable-base ratio.
+    """
+    ni, comp, wages = (bea.series(c) for c in (bea.NATIONAL_INCOME, bea.COMPENSATION, bea.WAGES))
+    years = [y for y in range(FIRST_YEAR, int(wages.index.max()) + 1)]
+    ratio = {str(y): round(float(comp[y] / wages[y]), 4) for y in years}
+    if not all(1.0 < v < 1.5 for v in ratio.values()):
+        report.errors.append("BEA compensation/wages ratio outside 1.0-1.5")
+    return {
+        "meta": {"source": "bea", "table": "NIPA 1.12",
+                 "series": {"nationalIncome": bea.NATIONAL_INCOME,
+                            "compensation": bea.COMPENSATION, "wages": bea.WAGES}},
+        "compToWagesYear": latest,
+        "compToWages": ratio,
+        "nationalIncomeMillions": {str(y): float(ni[y]) for y in years},
+    }
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -390,6 +413,7 @@ def main() -> int:
     us_as = build_us_as(report, {"scale": us["scale"]}, us["latest"])
     presets = {"gildedAge": build_gilded_age(report)}
     dfa = build_dfa(report)
+    macro = build_macro(report, us["latest"])
     manifest = build_manifest(report)
     print_warnings(report.warnings)
     if report.errors:
@@ -403,6 +427,7 @@ def main() -> int:
     write("comparisons", comparisons)
     write("presets", presets)
     write("us-dfa-wealth", dfa)
+    write("us-macro", macro)
     write("manifest", manifest)
     return 0
 

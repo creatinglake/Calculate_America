@@ -58,4 +58,14 @@ SOURCES = [
         "citation": "Board of Governors of the Federal Reserve System, Distributional "
                     "Financial Accounts of the United States.",
     },
+    {
+        "id": "bea",
+        "title": "US Bureau of Economic Analysis, National Income and Product Accounts",
+        "url": "https://apps.bea.gov/national/Release/TXT/",
+        "files": ["NipaDataA.txt", "SeriesRegister.txt"],
+        "used_for": "Compensation-to-wages ratio and national income (NIPA Table 1.12).",
+        "license": "Not yet verified.",
+        "citation": "US Bureau of Economic Analysis, NIPA Table 1.12, National Income by "
+                    "Type of Income.",
+    },
 ]
