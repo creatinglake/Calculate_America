@@ -39,6 +39,8 @@ export interface Macro {
   nationalIncomeMillions: Record<string, number>;
   agiMillions: Record<string, number>;
   agiToNationalIncome: Record<string, number>;
+  priceIndex: Record<string, number>;
+  nationalIncomePerAdult: Record<string, number>;
   cpi: {
     dollarYear: number;
     dollarYearAverage: number;
@@ -46,6 +48,34 @@ export interface Macro {
     through: string;
     missingMonths: string[];
     ratio: number;
+  };
+}
+
+export interface TaxEffective {
+  meta: Record<string, string>;
+  byYear: Record<string, Record<'b50' | 'm40' | 'u9' | 't09' | 't009' | 't001' | 'all', number>>;
+}
+
+type Brackets = [number, number][];
+export interface TaxBrackets {
+  meta: Record<string, string>;
+  featuredYears: number[];
+  byYear: Record<string, {
+    single: Brackets;
+    mfj: Brackets;
+    irsRatesAgree?: boolean;
+    exemption?: { single: number | null; married: number | null };
+    deduction?:
+      | { rule: 'percentOfAgiCapped'; percent: number; cap: { single: number; mfj: number } }
+      | { rule: 'zeroBracketBuiltIn'; zeroBracket: { single: number; mfj: number } };
+    note?: string;
+  }>;
+  currentLaw: {
+    year: number;
+    single: Brackets;
+    mfj: Brackets;
+    standardDeduction: { single: number; mfj: number };
+    exemption: { single: number; mfj: number };
   };
 }
 
@@ -57,6 +87,8 @@ export interface DataFiles {
   comparisons: Comparisons;
   presets: Presets;
   'us-macro': Macro;
+  'us-tax-effective': TaxEffective;
+  'us-tax-brackets': TaxBrackets;
 }
 
 const cache = new Map<string, Promise<unknown>>();
