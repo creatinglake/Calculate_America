@@ -1,20 +1,30 @@
 import { ROUTES, matchRoute } from './routes';
+import { Link, useLocation, useScrollTopOnNavigate } from './app/router';
+import { useTheme } from './app/theme';
 
-// Phase 0 shell: one placeholder per route. Real pages arrive in later phases.
+// Shell with placeholder pages. Real pages arrive in Phase 4 onward, styled
+// after the design direction Adam picks.
 export function App() {
-  const path = matchRoute(window.location.pathname);
-  const route = ROUTES.find((r) => r.path === path);
+  const { path } = useLocation();
+  useScrollTopOnNavigate(path);
+  const [theme, toggleTheme] = useTheme();
+  const route = ROUTES.find((r) => r.path === matchRoute(path));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <header className="mb-8">
         <p className="text-sm uppercase tracking-wide text-neutral-500">Calculate America</p>
-        <h1 className="text-3xl font-semibold">Fair Share</h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-3xl font-semibold">Fair Share</h1>
+          <button type="button" onClick={toggleTheme} className="rounded border px-3 py-1 text-sm">
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
+        </div>
         <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
           {ROUTES.map((r) => (
-            <a key={r.path} href={r.path} className="underline">
+            <Link key={r.path} href={r.path} className="underline" aria-current={r === route ? 'page' : undefined}>
               {r.title}
-            </a>
+            </Link>
           ))}
         </nav>
       </header>
