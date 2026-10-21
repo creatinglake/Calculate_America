@@ -24,9 +24,9 @@ function Bar({ label, shares, keys = GROUP_KEYS, inset = false }: {
         {keys.map((k) => {
           const w = shares[k]! / total;
           return (
-            <div key={k} className="sg" title={`${GROUP_LABEL[k]}: ${pct(shares[k]!)}`}
+            <div key={k} className="sg" title={`${GROUP_LABEL[k]}: ${pct(shares[k]!)}`} data-small={w < 0.1}
               style={{ width: `${w * 100}%`, background: `var(--g-${k})`, color: `var(--g-${k}-ink)` }}>
-              {w >= LABEL_MIN ? pct(shares[k]!, w >= 0.12 ? 1 : 0) : ''}
+              {w >= LABEL_MIN ? pct(shares[k]!, w >= 0.14 ? 1 : 0) : ''}
             </div>
           );
         })}
@@ -40,7 +40,8 @@ export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, g
   gini: { today: number; scenario: number };
 }) {
   const top1 = (g: GroupShares) => g.t09 + g.t009 + g.t001;
-  const zoomPeople = Object.fromEntries(TOP1.map((k) => [k, GROUP_POP[k]])) as Record<GroupKey, number>;
+  // Each top group as a share of the top 1% of adults: 90%, 9%, 1%.
+  const zoomPeople = Object.fromEntries(TOP1.map((k) => [k, GROUP_POP[k] / 0.01])) as Record<GroupKey, number>;
   const table = (
     <table className="data-table">
       <thead>
@@ -91,7 +92,7 @@ export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, g
         Zoom in on the top 1% of adults (magnified 100 times). Together they receive {pct(top1(today))} of all income
         in {todayLabel}, and would receive {pct(top1(scenario))} divided like {scenarioLabel}.
       </p>
-      <Bar label="The top 1% of adults, split into its three groups" shares={zoomPeople} keys={TOP1} inset />
+      <Bar label="The top 1% of adults, split into its three groups (% of the top 1%)" shares={zoomPeople} keys={TOP1} inset />
       <p className="fine" style={{ marginTop: '1rem' }}>
         Gini coefficient: {gini.today.toFixed(3)} in {todayLabel}, {gini.scenario.toFixed(3)} divided like {scenarioLabel}.
         The Gini runs from 0 (everyone has the same income) to 1 (one person has all of it). It is computed from 127
