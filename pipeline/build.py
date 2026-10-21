@@ -10,10 +10,11 @@ import sys
 
 import numpy as np
 
+import autensplinter
 import psz
 import wid
 from bins import P0, P1, WIDTH, group_bins
-from checks import Report, check_headline, check_year
+from checks import SHARE_TOLERANCE as SHARE_TOL, Report, check_headline, check_year
 from common import OUT
 
 FIRST_YEAR = 1962  # full bottom-to-top distribution starts here (PSZ 2018 QJE)
@@ -69,6 +70,7 @@ def build_us_wid(report: Report) -> dict[str, dict]:
             "dollarYear": latest, "source": "wid",
         })
     out["latest"] = latest
+    out["scale"] = scale
     # Adults 20+ (npopuli992) for each year, for "how many people" figures.
     adults = wid.series(df, "npopuli992")
     out["ptinc"]["adults"] = {str(y): round(float(adults[y])) for y in out["ptinc"]["years"]}
@@ -252,6 +254,82 @@ def build_manifest(report: Report) -> dict:
     return {"sources": out}
 
 
+# Knots for smooth rescaling: the edges of the six groups.
+KNOTS = np.array([0.0, 0.5, 0.9, 0.99, 0.999, 0.9999, 1.0])
+
+
+def smooth_factors(share: np.ndarray, target: dict[str, float]) -> np.ndarray:
+    """Per-bin scale factors, piecewise-linear in rank with knots at group edges.
+
+    Chooses the knot values with the least squared change between neighbouring
+    knots, subject to every group's rescaled share equalling its target
+    exactly. Solved as an equality-constrained least-squares problem (KKT).
+    Decision recorded in VERIFICATION.md V12 (Adam, 2026-10-21).
+    """
+    mid = (np.array(P0) + np.array(P1)) / 2
+    n = len(KNOTS)
+    # basis[i, k]: weight of knot k in bin i's factor (linear interpolation)
+    basis = np.stack([np.interp(mid, KNOTS, np.eye(n)[k]) for k in range(n)], axis=1)
+    a = np.array([[share[i] * basis[i] for i in group_bins(g)] for g in GROUP_ORDER],
+                 dtype=object)
+    A = np.array([np.sum(rows, axis=0) for rows in a], dtype=float)
+    t = np.array([target[g] for g in GROUP_ORDER])
+    D = np.diff(np.eye(n), axis=0)
+    kkt = np.block([[2 * D.T @ D, A.T], [A, np.zeros((len(t), len(t)))]])
+    rhs = np.concatenate([np.zeros(n), t])
+    knots = np.linalg.solve(kkt, rhs)[:n]
+    return basis @ knots
+
+
+def rescale_to_groups(d: wid.YearDist, target: dict[str, float]) -> wid.YearDist:
+    """Scale the distribution smoothly so group shares match target.
+
+    The mean is unchanged (shares are relative), so averages scale by the same
+    factors as shares. Thresholds are re-derived from the new averages with
+    WID's midpoint rule.
+    """
+    f = smooth_factors(d.share, target)
+    if f.min() <= 0:
+        raise ValueError(f"smooth rescaling gave a non-positive factor ({f.min():.3f})")
+    avg = d.avg * f
+    return wid.YearDist(d.share * f, avg, derive_thresholds(avg))
+
+
+def build_us_as(report: Report, pretax: dict, latest: int) -> dict:
+    """PSZ shape rescaled to Auten-Splinter group shares (plan 3.2).
+
+    Years where the rescaled bins fail validation are listed as disabled,
+    not forced. AS years without data are simply absent.
+    """
+    as_shares = autensplinter.block_shares(autensplinter.PRETAX)
+    wid_dists = wid.distribution(wid.load("US"), "ptinc")
+    dists, disabled = {}, {}
+    for y in range(FIRST_YEAR, latest + 1):
+        if y not in as_shares:
+            continue
+        target = autensplinter.six_groups(as_shares[y])
+        total = sum(target.values())
+        if abs(total - 1) > SHARE_TOL:
+            report.errors.append(f"AS {y}: six groups sum to {total:.4f}")
+            continue
+        d = rescale_to_groups(wid_dists[y], target)
+        r = check_year(f"US ptinc-as {y}", d.share, d.avg, d.thr)
+        if r.errors:
+            disabled[y] = r.errors[0]
+            continue
+        report.warnings += r.warnings
+        dists[y] = d
+    out = to_json(dists, pretax["scale"], {
+        "country": "US", "concept": "ptinc", "unit": "AS groups on 992j shape",
+        "dollarYear": latest, "source": "autensplinter", "table": "C2-Shares",
+        "block": autensplinter.PRETAX,
+        "label": "PSZ shape, rescaled to Auten-Splinter group shares",
+        "rescaling": "smooth: piecewise-linear factor in rank, knots at group edges",
+        "disabledYears": {str(k): v for k, v in disabled.items()},
+    })
+    return out
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -275,6 +353,7 @@ def main() -> int:
     us = build_us_wid(report)
     posttax = build_us_posttax(report, us["index"], us["latest"])
     comparisons = build_comparisons(report)
+    us_as = build_us_as(report, {"scale": us["scale"]}, us["latest"])
     presets = {"gildedAge": build_gilded_age(report)}
     manifest = build_manifest(report)
     print_warnings(report.warnings)
@@ -285,6 +364,7 @@ def main() -> int:
     write("us-ptinc", us["ptinc"])
     write("us-hweal", us["hweal"])
     write("us-cainc", posttax)
+    write("us-ptinc-as", us_as)
     write("comparisons", comparisons)
     write("presets", presets)
     write("manifest", manifest)

@@ -50,3 +50,27 @@ def test_gilded_age_groups_sum_to_one_and_split_bottom():
 def test_per_person_order_rejects_inversion():
     g = build.gilded_age(0.5, 0.2, 0.1, 0.04, 0.9)  # bottom 50% richer per person than middle 40%
     assert not build.per_person_order_ok(g)
+
+
+def test_smooth_rescaling_hits_targets_and_is_continuous():
+    d = dist(tilt=1.3)
+    current = build.group_shares(d.share)
+    target = {"b50": current["b50"] * 1.15, "t001": current["t001"] * 0.6}
+    target["t09"] = current["t09"] * 0.8
+    target["t009"] = current["t009"] * 0.7
+    target["u9"] = current["u9"] * 0.95
+    target["m40"] = 1 - sum(target.values())
+    out = build.rescale_to_groups(d, target)
+    got = build.group_shares(out.share)
+    assert all(np.isclose(got[g], target[g], atol=1e-12) for g in target)
+    # No step at a group edge bigger than the slope on either side of it.
+    step = np.abs(np.diff(out.avg / d.avg))
+    for g in ("b50", "m40", "u9", "t09", "t009"):
+        last = build.group_bins(g)[-1]
+        assert step[last] <= max(step[last - 1], step[last + 1]) * 1.01 + 1e-12
+
+
+def test_smooth_rescaling_identity_when_targets_unchanged():
+    d = dist(tilt=1.2)
+    out = build.rescale_to_groups(d, build.group_shares(d.share))
+    assert np.allclose(out.avg, d.avg) and np.allclose(out.share, d.share)
