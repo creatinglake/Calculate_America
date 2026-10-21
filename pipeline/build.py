@@ -126,6 +126,56 @@ def build_us_posttax(report: Report, index, dollar_year: int) -> dict:
     })
 
 
+# Comparison areas for presets (FAIRSHARE_PLAN.md 3.1, 5). QX = Western Europe.
+COMPARISONS = ["SE", "DK", "NO", "FI", "FR", "DE", "GB", "QX"]
+# Most recent cainc year must be at least this recent to be offered;
+# FR's only cainc years are 1970-1979 (VERIFICATION.md V7).
+MIN_POSTTAX_YEAR = 2000
+
+
+def year_entry(d: wid.YearDist, year: int, currency: str) -> dict:
+    return {
+        "year": year,
+        "currency": currency,
+        "avg": [round(float(v)) for v in d.avg],
+        "thr": [round(float(v)) for v in d.thr],
+        "share": [float(f"{v:.6g}") for v in d.share],
+        "mean": round(float(np.dot(WIDTH, d.avg))),
+    }
+
+
+def build_comparisons(report: Report) -> dict:
+    """Latest estimated pre-tax and post-tax (cainc) shape for each area.
+
+    Values stay in the area's own constant currency: presets use the shape
+    only, scaled to US national income by the engine.
+    """
+    import pandas as pd
+
+    areas = {}
+    for c in COMPARISONS:
+        df = wid.load(c)
+        meta = pd.read_csv(wid.RAW / "wid" / f"WID_metadata_{c}.csv", sep=";",
+                           keep_default_na=False)
+        row = meta[meta.variable == "aptincj992"].iloc[0]
+        entry: dict = {"name": row.countryname.removeprefix("the "), "ptinc": None, "cainc": None}
+        for concept in ("ptinc", "cainc"):
+            dists = wid.distribution(df, concept)
+            if not dists:
+                continue
+            y = latest_estimated(dists)
+            if concept == "cainc" and y < MIN_POSTTAX_YEAR:
+                continue
+            d = dists[y]
+            report.extend(check_year(f"{c} {concept} {y}", d.share, d.avg, d.thr))
+            entry[concept] = year_entry(d, y, row.unit)
+        areas[c] = entry
+    return {"meta": {"unit": "992j", "source": "wid",
+                     "note": "Shapes only; values in each area's constant local currency."},
+            "bins": [{"p0": a, "p1": b} for a, b in zip(P0, P1)],
+            "areas": areas}
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -148,6 +198,7 @@ def main() -> int:
     report = Report()
     us = build_us_wid(report)
     posttax = build_us_posttax(report, us["index"], us["latest"])
+    comparisons = build_comparisons(report)
     print_warnings(report.warnings)
     if report.errors:
         for e in report.errors:
@@ -156,6 +207,7 @@ def main() -> int:
     write("us-ptinc", us["ptinc"])
     write("us-hweal", us["hweal"])
     write("us-cainc", posttax)
+    write("comparisons", comparisons)
     return 0
 
 
