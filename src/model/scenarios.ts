@@ -25,6 +25,11 @@ export interface PresetCard {
 export interface Resolved {
   ok: true;
   today: { dist: Distribution; year: number; file: DataFile };
+  /**
+   * After-tax views: the user enters income before taxes, so they are ranked
+   * in the pre-tax distribution of the same year and compared at that rank.
+   */
+  rankBy?: { dist: Distribution; year: number };
   scenario: { dist: Distribution; label: string; card?: PresetCard };
 }
 
@@ -177,5 +182,8 @@ export function resolve(data: Data, state: ViewState): Resolution {
       break;
   }
   if (typeof out === 'string') return { ok: false, reason: out };
-  return { ok: true, today, scenario: out };
+  const rankBy = post && data.ptinc.byYear[String(year)]
+    ? { dist: fromDataFile(data.ptinc, year), year }
+    : undefined;
+  return { ok: true, today, scenario: out, ...(rankBy ? { rankBy } : {}) };
 }

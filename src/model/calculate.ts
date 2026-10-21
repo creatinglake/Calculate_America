@@ -18,9 +18,11 @@ export interface Inputs {
 
 export interface Calculation {
   placement: ReturnType<typeof place>;
+  /** True when "income" is the after-tax income at the user's pre-tax rank. */
+  afterTax: boolean;
   /** Percentile in today's distribution, 0..1. */
   percentile: number;
-  /** The user's income per adult, in data dollars. */
+  /** The user's income per adult in data dollars (after tax at their rank, in after-tax views). */
   income: number;
   /** What someone at that percentile would receive under the scenario. */
   scenarioIncome: number;
@@ -38,13 +40,18 @@ export function calculate(r: Resolved, inputs: Inputs): Calculation {
   const placement = place(inputs.answers, inputs.compToWages, inputs.cpiRatio);
   const T = shapeOf(r.today.dist);
   const S = shapeOf(r.scenario.dist);
-  const income = placement.perAdultDataDollars;
-  const percentile = T.Q.rank(income);
+  // In after-tax views the entered (pre-tax) income sets the rank, and the
+  // comparison is between after-tax incomes at that rank.
+  const percentile = r.rankBy
+    ? shapeOf(r.rankBy.dist).Q.rank(placement.perAdultDataDollars)
+    : T.Q.rank(placement.perAdultDataDollars);
+  const income = r.rankBy ? T.Q.q(percentile) : placement.perAdultDataDollars;
   const scenarioIncome = counterfactual(percentile, T.mean, S, inputs.growthPenalty);
   const atZero = counterfactual(percentile, T.mean, S, 0);
   const today = summarize(r.today.dist, T.Q);
   return {
     placement,
+    afterTax: Boolean(r.rankBy),
     percentile,
     income,
     scenarioIncome,

@@ -27,7 +27,8 @@ export function ResultCard({ calc, scenarioLabel, todayYear, cpiRatio, cpiThroug
             <span className="kpi-unit">a year</span>
           </p>
           <p className="result-text">
-            If today's income were divided like <strong>{scenarioLabel}</strong>, someone at your place would receive{' '}
+            If {calc.afterTax ? 'income after taxes and cash transfers' : "today's income"} were divided like{' '}
+            <strong>{scenarioLabel}</strong>, someone at your place would {calc.afterTax ? 'have' : 'receive'}{' '}
             <strong>{money(alt)}</strong> instead of <strong>{money(now)}</strong>
             {weeks !== null && <>, a difference of about {weeks.toFixed(1)} weeks of work a year at your current pay</>}.
           </p>
@@ -52,6 +53,12 @@ export function ResultCard({ calc, scenarioLabel, todayYear, cpiRatio, cpiThroug
         {growthPenalty > 0 ? `, made ${Math.round(growthPenalty * 100)}% smaller` : ''}; only how it is divided changes.
         {calc.breakeven !== null && diff > 0 && <> Your result stays higher unless the economy would have been more than {Math.round(calc.breakeven * 100)}% smaller.</>}
       </p>
+      {calc.afterTax && (
+        <p className="fine">
+          After-tax view: your income before taxes sets your place ({todayYear}); the amounts are what someone at that
+          place has after taxes and cash transfers, now and under the scenario.
+        </p>
+      )}
       <HowCounted calc={calc} compToWages={compToWages} />
       <p className="fine">Dollars are today's, converted with CPI-U through {monthName(cpiThrough)}. Your rank is approximate.</p>
     </section>

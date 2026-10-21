@@ -38,3 +38,17 @@ describe('calculate', () => {
     expect(c.income).toBeCloseTo(100_000 / 1.1, 6);
   });
 });
+
+describe('after-tax view', () => {
+  it('ranks by pre-tax income and compares after-tax incomes at that rank', async () => {
+    const { DEFAULT_STATE, shapeOf, fromDataFile } = await import('../engine');
+    const r = resolve(data, { ...DEFAULT_STATE, concept: 'post' });
+    if (!r.ok) throw new Error(r.reason);
+    expect(r.rankBy?.year).toBe(2019);
+    const c = calculate(r, { answers: { ...answers, selfEmployment: 0, wages: 100_000 }, compToWages: 1.213, cpiRatio: 1, growthPenalty: 0 });
+    const pre = shapeOf(fromDataFile(data.ptinc, 2019)).Q.rank(121_300);
+    expect(c.percentile).toBeCloseTo(pre, 9);
+    expect(c.afterTax).toBe(true);
+    expect(c.income).toBeCloseTo(shapeOf(r.today.dist).Q.q(pre), 6);
+  });
+});
