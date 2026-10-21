@@ -69,6 +69,9 @@ def build_us_wid(report: Report) -> dict[str, dict]:
             "dollarYear": latest, "source": "wid",
         })
     out["latest"] = latest
+    # Adults 20+ (npopuli992) for each year, for "how many people" figures.
+    adults = wid.series(df, "npopuli992")
+    out["ptinc"]["adults"] = {str(y): round(float(adults[y])) for y in out["ptinc"]["years"]}
     # Headline check against the authors' own published series (PSZ Table B1).
     b1 = psz.share_table("TB1")
     pt = dists["ptinc"]
