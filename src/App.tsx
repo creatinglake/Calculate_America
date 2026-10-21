@@ -3,8 +3,9 @@ import { Link, useLocation, useScrollTopOnNavigate } from './app/router';
 import { useTheme } from './app/theme';
 import { Explore } from './pages/Explore';
 import { Top } from './pages/Top';
+import { Taxes } from './pages/Taxes';
 
-const NAV = ['/', '/explore/', '/top/', '/methods/', '/sources/', '/about/'] as const;
+const NAV = ['/', '/explore/', '/top/', '/taxes/', '/methods/', '/sources/', '/about/'] as const;
 
 // Pages other than the calculator are placeholders until their phases.
 export function App() {
@@ -48,6 +49,8 @@ export function App() {
           <Explore />
         ) : route?.path === '/top/' ? (
           <Top />
+        ) : route?.path === '/taxes/' ? (
+          <Taxes />
         ) : (
           <div className="intro">
             <h1>{route ? route.title : 'Page not found'}</h1>

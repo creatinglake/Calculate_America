@@ -6,6 +6,7 @@ import {
 } from '../engine';
 import type { PresetInfo } from '../model/scenarios';
 import { money, pct, percentileLabel } from '../ui/format';
+import { navigate } from '../app/router';
 
 export const GROUP_LABEL: Record<GroupKey, string> = {
   b50: 'Bottom 50%', m40: 'Middle 40%', u9: 'Upper 9%', t09: 'Top 1% to 0.1%', t009: 'Top 0.1% to 0.01%', t001: 'Top 0.01%',
@@ -48,8 +49,7 @@ export function ScenarioPicker({ state, onChange, years, presets, today, scenari
         {tabs.map((t) => (
           <button
             key={t.key} type="button" role="tab" aria-selected={tab === t.key}
-            disabled={t.key === 'taxes'} title={t.key === 'taxes' ? 'Coming soon' : undefined}
-            onClick={() => go(t.key)}
+            onClick={() => (t.key === 'taxes' ? navigate('/taxes/') : go(t.key))}
           >
             {t.label}
           </button>

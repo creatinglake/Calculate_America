@@ -35,9 +35,10 @@ function Bar({ label, shares, keys = GROUP_KEYS, inset = false }: {
   );
 }
 
-export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, gini }: {
+export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, gini, hideGini = false }: {
   today: GroupShares; scenario: GroupShares; todayLabel: string; scenarioLabel: string;
   gini: { today: number; scenario: number };
+  hideGini?: boolean;
 }) {
   const top1 = (g: GroupShares) => g.t09 + g.t009 + g.t001;
   // Each top group as a share of the top 1% of adults: 90%, 9%, 1%.
@@ -93,11 +94,11 @@ export function PeopleIncomeBars({ today, scenario, todayLabel, scenarioLabel, g
         in {todayLabel}, and would receive {pct(top1(scenario))} divided like {scenarioLabel}.
       </p>
       <Bar label="The top 1% of adults, split into its three groups (% of the top 1%)" shares={zoomPeople} keys={TOP1} inset />
-      <p className="fine" style={{ marginTop: '1rem' }}>
+      {!hideGini && <p className="fine" style={{ marginTop: '1rem' }}>
         Gini coefficient: {gini.today.toFixed(3)} in {todayLabel}, {gini.scenario.toFixed(3)} divided like {scenarioLabel}.
         The Gini runs from 0 (everyone has the same income) to 1 (one person has all of it). It is computed from 127
         income groups, which slightly understates it.
-      </p>
+      </p>}
     </ChartFrame>
   );
 }

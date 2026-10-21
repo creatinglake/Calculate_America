@@ -4,6 +4,7 @@ import { ROUTES } from '../src/routes.ts';
 const HEADINGS: Record<string, string> = {
   '/explore/': 'Same size economy, divided another way',
   '/top/': 'Ten times smaller, again and again',
+  '/taxes/': "Today's incomes, taxed another way",
 };
 
 for (const { path, title } of ROUTES) {
@@ -31,4 +32,11 @@ test('zoom grid opens the top 1%', async ({ page }) => {
   await page.goto('/top/');
   await page.getByRole('button', { name: /Zoom in to the top 1%/ }).click();
   await expect(page.getByText(/The top 1% of adults/)).toBeVisible();
+});
+
+test('tax page shows revenue and a personal result', async ({ page }) => {
+  await page.goto('/taxes/');
+  await page.getByLabel('Wages and salary').fill('80,000');
+  await expect(page.getByRole('heading', { name: 'New revenue' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your income after taxes' })).toBeVisible();
 });

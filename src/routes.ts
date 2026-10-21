@@ -4,7 +4,7 @@ export const ROUTES = [
   { path: '/', title: 'Story' },
   { path: '/explore/', title: 'Calculator' },
   { path: '/top/', title: 'The top, up close' },
-  { path: '/taxes/', title: 'Tax scenarios' },
+  { path: '/taxes/', title: 'Taxes' },
   { path: '/wealth/', title: 'Wealth' },
   { path: '/methods/', title: 'Methods' },
   { path: '/ethics/', title: 'The case' },

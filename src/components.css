@@ -176,3 +176,9 @@ input[type='range'] { accent-color: var(--panel-accent); width: 100%; }
 .zoom-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .btn-primary { font: inherit; font-size: 0.88rem; font-weight: 700; color: var(--accent-text); background: var(--accent); border: 0; border-radius: 999px; padding: 0.45rem 1rem; cursor: pointer; }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* tax bracket editor */
+.bracket-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.88rem; font-weight: 600; }
+.bracket-row input { width: 7.5rem; font: inherit; color: var(--panel-text); background: var(--field); border: 1px solid var(--field-border); border-radius: 8px; padding: 0.35rem 0.5rem; margin: 0 0.25rem; }
+.bracket-row label + label input { width: 4rem; }
+.bracket-row input:disabled { opacity: 0.6; }
