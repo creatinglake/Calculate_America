@@ -153,3 +153,11 @@ Resolved: NIPA factor (V15), AS files (V11), DFA format and latest quarter (V13)
 - 2023 annual average 304.702. October 2025 is "-" with the BLS footnote "Data unavailable due to the 2025 lapse in appropriations"; it is left out, not filled in.
 - Ratio used by the engine: average of the available months October 2025–September 2026 (11 months, 330.760) ÷ 2023 average = 1.0855. A user's income entered in today's dollars is divided by this to compare with the data (2023 dollars). Stored in `us-macro.json` under `cpi`.
 - Method choice (latest 12 months rather than a single month) is recorded here for the methods page.
+
+## V21. Current-law and historical tax parameters — OK
+- **2026 current law** (the latest law in force): IRS Rev. Proc. 2025-32 (https://www.irs.gov/pub/irs-drop/rp-25-32.pdf, read 2026-10-21). Table 3 (single) brackets start at $0, $12,400, $50,400, $105,700, $201,775, $256,225, $640,600 at 10/12/22/24/32/35/37%; Table 1 (joint) at $0, $24,800, $100,800, $211,400, $403,550, $512,450, $768,700. Section 3.14 standard deduction $16,100 single, $32,200 joint. Section 4.01 also restates 2025 standard deductions after the OBBBA ($15,750 / $31,500).
+- **Personal exemptions 2026: $0.** IRS Publication 15-T (2026) states its tables reflect "the permanent termination of personal exemptions"; IRS Notice 2018-84 describes the original zeroing under § 151(d)(5). The temporary extra deduction for people 65 and over is not modelled.
+- **1953 and 1963 standard deduction:** the smaller of $1,000 or 10% of AGI ($500 for a married person filing separately); $600 per exemption. Sources: *Statistics of Income 1953 Part 1* and *1963* report text (URLs in V17). Table 23 exemptions agree ($600).
+- **1980:** zero bracket amount $3,400 joint, $2,300 single, built into the tax tables and rate schedules (*Statistics of Income 1980*, "Zero Bracket Amount"). Tax Foundation's 1980 schedules start with a 0% bracket to exactly these amounts. Exemption $1,000 (Table 23).
+- Stored in `pipeline/manual/tax_law.json`, copied into `us-tax-brackets.json` (`currentLaw`, and `deduction` on the featured years).
+- Indexing series added to `us-macro.json`: WID `inyixxi999` rebased to 1 in 2023 (`priceIndex`) and `anninci992` in 2023 dollars (`nationalIncomePerAdult`, 1913–2023; 2023 = $89,363, equal to the income file's mean).
