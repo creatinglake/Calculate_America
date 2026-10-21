@@ -27,12 +27,14 @@ export function moneyDiff(x: number): string {
   return x >= 0 ? `+${s}` : `−${s}`;
 }
 
-/** Compact: "$1.2M", "$48K". */
+/** Compact: "$1.64T", "$1.2B", "$48K". */
 export function moneyShort(x: number): string {
   const a = Math.abs(x);
-  const sign = x < 0 ? '−' : '';
-  if (a >= 1e9) return `${sign}$${(a / 1e9).toPrecision(3).replace(/\.0+$/, '')}B`;
-  if (a >= 1e6) return `${sign}$${(a / 1e6).toPrecision(3).replace(/\.0+$/, '')}M`;
+  const sign = x < 0 ? '\u2212' : '';
+  const three = (v: number) => String(Number(v.toPrecision(3)));
+  if (a >= 1e12) return `${sign}$${three(a / 1e12)}T`;
+  if (a >= 1e9) return `${sign}$${three(a / 1e9)}B`;
+  if (a >= 1e6) return `${sign}$${three(a / 1e6)}M`;
   if (a >= 1e3) return `${sign}$${Math.round(a / 1e3)}K`;
   return `${sign}$${Math.round(a)}`;
 }

@@ -12,6 +12,9 @@ describe('format', () => {
     expect(moneyDiff(-1200)).toBe('−$1,200');
     expect(moneyShort(2_108_379)).toBe('$2.11M');
     expect(moneyShort(48_000)).toBe('$48K');
+    expect(moneyShort(1.64e12)).toBe('$1.64T');
+    expect(moneyShort(-69.9e9)).toBe('\u2212$69.9B');
+    expect(moneyShort(2e9)).toBe('$2B');
   });
   it('formats shares and percentiles', () => {
     expect(pct(0.2073)).toBe('20.7%');
