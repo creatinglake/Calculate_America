@@ -117,3 +117,11 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 - Source: BEA NIPA bulk file https://apps.bea.gov/national/Release/TXT/NipaDataA.txt (Last-Modified 30 Sep 2026, retrieved 2026-10-21). Series located via `SeriesRegister.txt`: Table 1.12 line 1 `A032RC` national income, line 2 `A033RC` compensation of employees, line 3 `A034RC` wages and salaries.
 - Ratio `A033RC / A034RC`: 1963 1.113, 1980 1.181, 2000 1.212, 2019 1.227, **2023 1.213**, 2024 1.212, 2025 1.210. Plan said "around 1.2": confirmed.
 - The engine uses the ratio for the "today" year (2023), stored in `us-macro.json` with the full 1962–2025 series and national income.
+
+## V16. PSZ effective tax rates by group — OK
+- Table: PSZ updated series workbook, Table G1 (`TG1`) "Average tax rates by pre-tax income group", equal-split adults 20+, "% of pre-tax income including pure taxable capital gains". Groups: All, Bottom 90%, Bottom 50%, Middle 40%, Top 10%, 5%, 1%, 0.5%, 0.1%, 0.01%, 0.001%. Years 1913–2019; Bottom 50% and Middle 40% from 1962.
+- Scope (Table G2 decomposition exists): all taxes, federal, state and local, including income, payroll, corporate, property, estate and sales taxes.
+- Six non-overlapping groups: P90–99, P99–99.9 and P99.9–99.99 rates are separated from the cumulative top groups, weighting by Table B1 pre-tax income shares (`build.six_group_rates`).
+- Check: the six rates weighted by B1 shares reproduce G1's "All" rate within 0.001 in 1962, 1980, 2000 and 2019. 1963 differs by 0.009 (0.272 vs 0.281), probably because G1's denominator includes taxable capital gains and B1's shares do not. Logged as a warning; the build fails above 0.015.
+- Examples (G1-derived): 1963 bottom 50% 22.7%, top 0.01% 55.5%; 2019 bottom 50% 26.0%, top 0.01% 35.1%.
+- Output `us-tax-effective.json`, 1962–2019.
