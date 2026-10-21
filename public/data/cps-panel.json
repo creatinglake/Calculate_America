@@ -1,0 +1,37 @@
+{
+ "meta": {
+  "source": "ipums-cps",
+  "unit": "persons with positive INCTOT, as included in the spreadsheet",
+  "note": "CPS ASEC asks about the previous calendar year. WID figures are pre-tax national income, equal-split adults 20+."
+ },
+ "years": [
+  {
+   "surveyYear": 1963,
+   "incomeYear": 1962,
+   "records": 25933,
+   "weightedPersonsWithIncome": 60294401,
+   "maxIncome": 76000,
+   "cpsTop1Share": 0.0677,
+   "cpsTop01Share": 0.0133,
+   "widTop1Share": 0.1285,
+   "widTop01Share": 0.0437
+  },
+  {
+   "surveyYear": 2024,
+   "incomeYear": 2023,
+   "records": 102330,
+   "weightedPersonsWithIncome": 241648118,
+   "maxIncome": 2108379,
+   "cpsTop1Share": 0.105,
+   "cpsTop01Share": 0.0191,
+   "widTop1Share": 0.2074,
+   "widTop01Share": 0.0995
+  }
+ ],
+ "spreadsheetExample": {
+  "income": 100000,
+  "percentile": 0.830952,
+  "meanRatio": 17.801552,
+  "result": 110369.62
+ }
+}

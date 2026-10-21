@@ -79,4 +79,15 @@ SOURCES = [
         "citation": "Internal Revenue Service, Statistics of Income: Individual Income Tax "
                     "Returns (1953, 1963, 1980 reports; Publication 1304 Table 1.1, 2023).",
     },
+    {
+        "id": "ipums-cps",
+        "title": "IPUMS CPS, Annual Social and Economic Supplement (survey years 1963 and 2024)",
+        "url": "https://cps.ipums.org/",
+        "files": [],
+        "used_for": "Methods-page panel only (survey vs tax data at the top) and a "
+                    "regression test. Aggregates only; microdata is not published.",
+        "license": "IPUMS terms of use: no redistribution of microdata; cite IPUMS.",
+        "citation": "IPUMS CPS, University of Minnesota, www.ipums.org. Extract version "
+                    "to confirm with Adam (VERIFICATION.md V18).",
+    },
 ]
