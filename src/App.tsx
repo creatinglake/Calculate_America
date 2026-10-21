@@ -6,7 +6,8 @@ import { Top } from './pages/Top';
 import { Taxes } from './pages/Taxes';
 import { Wealth } from './pages/Wealth';
 
-const NAV = ['/', '/explore/', '/top/', '/taxes/', '/wealth/', '/methods/', '/sources/', '/about/'] as const;
+// The logo links to the story at /.
+const NAV = ['/explore/', '/top/', '/taxes/', '/wealth/', '/methods/', '/sources/', '/about/'] as const;
 const NAV_LABEL: Record<string, string> = { '/explore/': 'Calculator', '/top/': 'The top' };
 
 // Pages other than the calculator are placeholders until their phases.
