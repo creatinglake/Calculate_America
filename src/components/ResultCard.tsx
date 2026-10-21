@@ -1,9 +1,10 @@
 /** Headline result card (plan 6.2, chart 1). */
 import type { Calculation } from '../model/calculate';
-import { money, moneyDiff, moneyExact, percentAbove } from '../ui/format';
+import { money, moneyDiff, moneyExact, monthName, percentAbove } from '../ui/format';
 
-export function ResultCard({ calc, scenarioLabel, todayYear, cpiRatio, cpiThrough, growthPenalty }: {
+export function ResultCard({ calc, scenarioLabel, todayYear, cpiRatio, cpiThrough, growthPenalty, compToWages }: {
   calc: Calculation;
+  compToWages: number;
   scenarioLabel: string;
   todayYear: number;
   cpiRatio: number;
@@ -18,6 +19,7 @@ export function ResultCard({ calc, scenarioLabel, todayYear, cpiRatio, cpiThroug
   return (
     <section aria-labelledby="result-h" className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
       <h2 id="result-h" className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">Your result</h2>
+      <HowCounted calc={calc} compToWages={compToWages} />
       <dl className="mt-3 grid grid-cols-2 gap-4">
         <div>
           <dt className="text-sm text-[var(--text-muted)]">Your income now</dt>
@@ -40,8 +42,26 @@ export function ResultCard({ calc, scenarioLabel, todayYear, cpiRatio, cpiThroug
         Assumes the same average income per adult as {todayYear}
         {growthPenalty > 0 ? `, made ${Math.round(growthPenalty * 100)}% smaller,` : ''}; only how it is divided changes.
         {calc.breakeven !== null && diff > 0 && <> Your result stays higher unless the economy would have been more than {Math.round(calc.breakeven * 100)}% smaller.</>}
-        {' '}Dollars are today's, converted with CPI-U through {cpiThrough}. Your rank is approximate.
+        {' '}Dollars are today's, converted with CPI-U through {monthName(cpiThrough)}. Your rank is approximate.
       </p>
     </section>
+  );
+}
+
+/** Shows how the entered amounts became income per adult in national-income terms. */
+function HowCounted({ calc, compToWages }: { calc: Calculation; compToWages: number }) {
+  const p = calc.placement;
+  const wages = p.wagesScaled / compToWages;
+  const other = p.combined - p.wagesScaled;
+  const halved = p.perAdult !== p.combined;
+  if (wages === 0 && !halved) return null;
+  const parts: string[] = [];
+  if (wages > 0) parts.push(`${money(wages)} wages \u00d7 ${compToWages.toFixed(3)} for employer benefits and payroll taxes`);
+  if (other !== 0) parts.push(`${money(other)} other income`);
+  return (
+    <p className="mt-2 text-sm text-[var(--text-muted)]">
+      How we count it: {parts.join(' + ')}
+      {halved ? `, split between two adults` : ''} = {money(p.perAdult)} per adult.
+    </p>
   );
 }

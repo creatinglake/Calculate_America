@@ -64,6 +64,7 @@ export function Explore() {
           <ResultCard
             calc={calc} scenarioLabel={resolved.scenario.label} todayYear={resolved.today.year}
             cpiRatio={macro.cpi.ratio} cpiThrough={macro.cpi.through} growthPenalty={state.growthPenalty}
+            compToWages={macro.compToWages[String(compYear)]!}
           />
         )}
         {resolved.ok && resolved.scenario.note && <p className="text-sm text-[var(--text-muted)]">{resolved.scenario.note}</p>}

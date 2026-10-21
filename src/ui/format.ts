@@ -63,3 +63,9 @@ export function ordinal(x: number): string {
 export function percentAbove(x: number): string {
   return x >= 99 ? String(Number(Math.min(x, 99.99).toFixed(2))) : String(Math.round(x));
 }
+
+/** "2026-09" -> "September 2026". */
+export function monthName(ym: string): string {
+  const [y, m] = ym.split('-').map(Number);
+  return new Date(Date.UTC(y!, m! - 1, 1)).toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+}
