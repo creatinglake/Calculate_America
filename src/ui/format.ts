@@ -58,3 +58,8 @@ export function ordinal(x: number): string {
   if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
   return `${n}${mod10 === 1 ? 'st' : mod10 === 2 ? 'nd' : mod10 === 3 ? 'rd' : 'th'}`;
 }
+
+/** "77" or "99.95" for "you earn more than N% of adults". */
+export function percentAbove(x: number): string {
+  return x >= 99 ? String(Number(Math.min(x, 99.99).toFixed(2))) : String(Math.round(x));
+}

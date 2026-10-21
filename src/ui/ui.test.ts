@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { money, moneyDiff, moneyShort, ordinal, pct, percentileLabel, roundMoney } from './format';
+import { money, moneyDiff, moneyShort, ordinal, pct, percentAbove, percentileLabel, roundMoney } from './format';
 import { P_MAX, stretch, unstretch } from './stretchAxis';
 
 describe('format', () => {
@@ -23,6 +23,8 @@ describe('format', () => {
     expect(ordinal(99.954)).toBe('99.95th');
     expect(ordinal(42.6)).toBe('43rd');
     expect(ordinal(11)).toBe('11th');
+    expect(percentAbove(77.2)).toBe('77');
+    expect(percentAbove(99.954)).toBe('99.95');
   });
 });
 
