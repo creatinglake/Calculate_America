@@ -35,11 +35,19 @@ describe('scenario resolution', () => {
     expect(r.ok && r.today.year).toBe(2022);
   });
 
-  it('every preset resolves pre-tax', () => {
+  it('every preset resolves pre-tax, with a card', () => {
     for (const p of presetList(data)) {
       const r = resolve(data, at({ scenario: { kind: 'preset', id: p.id } }));
       expect(r.ok, p.id).toBe(true);
+      if (r.ok) expect(r.scenario.card?.body.length, p.id).toBeGreaterThan(0);
     }
+  });
+
+  it('Gilded Age card quotes the range from the data', () => {
+    const r = resolve(data, at({ scenario: { kind: 'preset', id: 'gilded-age' } }));
+    if (!r.ok) throw new Error(r.reason);
+    const low = (data.presets.gildedAge.groups.low.b50! * 100).toFixed(1);
+    expect(r.scenario.card!.body.join(' ')).toContain(`${low}%`);
   });
 
   it('France and Western Europe have no post-tax preset', () => {

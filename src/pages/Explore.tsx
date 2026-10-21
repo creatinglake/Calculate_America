@@ -4,6 +4,7 @@ import { fromDataFile, groupShares, shapeOf } from '../engine';
 import { useCalculatorData } from '../app/useData';
 import { useViewState } from '../app/useViewState';
 import { EMPTY_FIELDS, IncomeForm, RankBar, toAnswers, type IncomeFields } from '../components/IncomeForm';
+import { PresetCard } from '../components/PresetCard';
 import { ResultCard } from '../components/ResultCard';
 import { ScenarioPicker } from '../components/ScenarioPicker';
 import { Switches } from '../components/Switches';
@@ -85,7 +86,7 @@ export function Explore() {
               compToWages={compToWages}
             />
           )}
-          {resolved.ok && resolved.scenario.note && <p className="note">{resolved.scenario.note}</p>}
+          {resolved.ok && resolved.scenario.card && <PresetCard card={resolved.scenario.card} />}
           {resolved.ok && shapes && (
             <PeopleIncomeBars
               today={groupShares(resolved.today.dist)} scenario={groupShares(resolved.scenario.dist)}
