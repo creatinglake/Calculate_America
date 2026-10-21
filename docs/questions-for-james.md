@@ -27,3 +27,12 @@ Computed with the trapezoid rule on the 127-bin Lorenz curve, which slightly und
 - **Elasticity under effective-rate schedules:** there is no marginal rate, so the behavioural response uses the change in average rates by group. Statutory schedules use marginal rates at each bin's average income.
 - **Negative revenue:** if a schedule raises less than current taxes, the recycling rule charges the shortfall (e.g. an equal charge per adult) rather than leaving it unfunded.
 - Current-law comparisons use 2026 federal law (Rev. Proc. 2025-32), converted to 2023 dollars with CPI-U.
+
+## 6. Wage factor (open; also for Adam)
+The calculator scales wages by total employee compensation ÷ wages (BEA NIPA 1.12; 1.213 for 2023), as the plan specified. The independent review points out that compensation includes employer pension and Social Security contributions, which pre-tax national income does not count (it counts benefits), and that wages include the employee's own payroll tax; counting only health insurance and other non-pension supplements would give roughly 1.10 by its estimate. Which should the site use?
+
+## 7. Rank precision
+The plan says to tell users their rank is approximate "plus or minus 2 to 3 percentiles". Nothing in the code estimates that range, so the methods page now just says "approximate"; the input form still says two or three. Is there a basis for the figure?
+
+## 8. Paglin Gini
+Planned for later. The deck's charts (Lorenz curve with an age curve inside it) are images; the explanation should come from you.
