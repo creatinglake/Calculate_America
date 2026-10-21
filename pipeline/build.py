@@ -13,6 +13,7 @@ import numpy as np
 import autensplinter
 import bea
 import psz
+import taxfoundation
 import wid
 from bins import P0, P1, WIDTH, group_bins
 from checks import SHARE_TOLERANCE as SHARE_TOL, Report, check_headline, check_year
@@ -460,6 +461,66 @@ def group_shares_from_cumulative(s: dict[str, float]) -> dict[str, float]:
             "t009": s["Top 0.1%"] - s["Top 0.01%"], "t001": s["Top 0.01%"]}
 
 
+# Years whose statutory schedules tax mode offers first (plan section 7).
+TAX_YEARS = [1953, 1963, 1980]
+
+
+def irs_table23() -> dict[int, dict[str, float | None]]:
+    """IRS SOI Historical Table 23: exemptions and lowest/highest bracket rates."""
+    import re
+
+    import pandas as pd
+
+    def num(v) -> float | None:
+        txt = re.sub(r"\[[^\]]*\]", "", str(v)).replace(",", "").strip()
+        try:
+            return float(txt)
+        except ValueError:
+            return None
+
+    x = pd.read_excel(wid.RAW / "irs" / "histab23.xls", header=None)
+    out = {}
+    for i in range(len(x)):
+        y = str(x.iloc[i, 0]).split(".")[0]
+        if y.isdigit():
+            out[int(y)] = {"exemptionSingle": num(x.iloc[i, 1]),
+                           "exemptionMarried": num(x.iloc[i, 2]),
+                           "lowestRate": num(x.iloc[i, 4]), "highestRate": num(x.iloc[i, 6])}
+    return out
+
+
+def build_tax_brackets(report: Report) -> dict:
+    """Statutory federal income tax schedules (Tax Foundation), single and
+    married filing jointly, with IRS Table 23 exemptions and a cross-check of
+    each year's lowest and highest rates."""
+    tf, notes, irs = taxfoundation.schedules(), taxfoundation.notes(), irs_table23()
+    years = {}
+    for y in sorted(tf):
+        if y < 1913 or "single" not in tf[y] or "mfj" not in tf[y]:
+            continue
+        entry: dict = {st: [[round(r, 4), t] for r, t in tf[y][st]] for st in ("single", "mfj")}
+        for st in ("single", "mfj"):
+            thr = [t for _, t in tf[y][st]]
+            if thr[0] != 0 or any(b <= a for a, b in zip(thr, thr[1:])):
+                report.errors.append(f"Tax Foundation {y} {st}: thresholds not increasing from 0")
+        if y in irs and irs[y]["lowestRate"] is not None:
+            rates = [r for r, _ in tf[y]["mfj"] if r > 0]
+            agree = (abs(100 * rates[0] - irs[y]["lowestRate"]) <= 0.05
+                     and abs(100 * max(rates) - irs[y]["highestRate"]) <= 0.05)
+            entry["irsRatesAgree"] = agree
+            entry["exemption"] = {"single": irs[y]["exemptionSingle"],
+                                  "married": irs[y]["exemptionMarried"]}
+            if y in TAX_YEARS and not agree:
+                report.errors.append(f"Tax brackets {y}: Tax Foundation and IRS Table 23 differ")
+        if notes.get(y):
+            entry["note"] = notes[y]
+        years[str(y)] = entry
+    return {"meta": {"source": "taxfoundation", "check": "irs-soi Historical Table 23",
+                     "units": "rate as fraction, lower threshold of taxable income in "
+                              "current dollars"},
+            "featuredYears": TAX_YEARS, "byYear": years}
+
+
 def write(name: str, data: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{name}.json"
@@ -488,6 +549,7 @@ def main() -> int:
     dfa = build_dfa(report)
     macro = build_macro(report, us["latest"])
     eff_tax = build_effective_tax(report)
+    brackets = build_tax_brackets(report)
     manifest = build_manifest(report)
     print_warnings(report.warnings)
     if report.errors:
@@ -503,6 +565,7 @@ def main() -> int:
     write("us-dfa-wealth", dfa)
     write("us-macro", macro)
     write("us-tax-effective", eff_tax)
+    write("us-tax-brackets", brackets)
     write("manifest", manifest)
     return 0
 
