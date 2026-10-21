@@ -5,6 +5,7 @@ const HEADINGS: Record<string, string> = {
   '/explore/': 'Same size economy, divided another way',
   '/top/': 'Ten times smaller, again and again',
   '/taxes/': "Today's incomes, taxed another way",
+  '/wealth/': 'What you own, divided another way',
 };
 
 for (const { path, title } of ROUTES) {
@@ -39,4 +40,11 @@ test('tax page shows revenue and a personal result', async ({ page }) => {
   await page.getByLabel('Wages and salary').fill('80,000');
   await expect(page.getByRole('heading', { name: 'New revenue' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your income after taxes' })).toBeVisible();
+});
+
+test('wealth page ranks a net worth', async ({ page }) => {
+  await page.goto('/wealth/');
+  await page.getByLabel('What you own minus what you owe').fill('250,000');
+  await expect(page.getByText(/Higher than about/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your wealth under this division' })).toBeVisible();
 });

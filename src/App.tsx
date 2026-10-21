@@ -4,8 +4,9 @@ import { useTheme } from './app/theme';
 import { Explore } from './pages/Explore';
 import { Top } from './pages/Top';
 import { Taxes } from './pages/Taxes';
+import { Wealth } from './pages/Wealth';
 
-const NAV = ['/', '/explore/', '/top/', '/taxes/', '/methods/', '/sources/', '/about/'] as const;
+const NAV = ['/', '/explore/', '/top/', '/taxes/', '/wealth/', '/methods/', '/sources/', '/about/'] as const;
 const NAV_LABEL: Record<string, string> = { '/explore/': 'Calculator', '/top/': 'The top' };
 
 // Pages other than the calculator are placeholders until their phases.
@@ -52,6 +53,8 @@ export function App() {
           <Top />
         ) : route?.path === '/taxes/' ? (
           <Taxes />
+        ) : route?.path === '/wealth/' ? (
+          <Wealth />
         ) : (
           <div className="intro">
             <h1>{route ? route.title : 'Page not found'}</h1>
