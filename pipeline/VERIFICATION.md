@@ -88,3 +88,16 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 - Averages increase in every year 1962–2019. Group shares rebuilt from the 127 bins match PSZ's own Table C1b (top 1% and bottom 50%, 1962, 1963, 1980, 2000, 2019) within 0.02 points.
 - 61 bin-years have a negative average (bottom bins): warnings, not failures.
 - Output `us-cainc.json`: 57 years, 1962–2019 without 1985 (`meta.missingYears`).
+
+## V11. Auten-Splinter files, groups, years and unit — OK (plan wording corrected)
+- davidsplinter.com (read 2026-10-21) links three workbooks. Site labels: `AutenSplinter-IncomeIneq.xlsx` = "Extension through 2022" (Last-Modified 23 Feb 2026); `AutenSplinter-IncomeIneq-2024.xlsx` = "Original through 2019" (4 Apr 2025); `AS-Update-2025.xlsx` = data for "Income Inequality in the United States: Extensions and Updates" (4 Apr 2025, summary tables only). **Current file: `AutenSplinter-IncomeIneq.xlsx`.**
+- Used: Table C2 (`C2-Shares`), block "2. Pre-tax National Income (232)", columns P0-50, P50-90, P90-100, P95-100, P99-100, P99.5-100, P99.9-100, P99.99-100. These give all six of the plan's groups.
+- Years: 1960–2022. The 2023 row is `#DIV/0!` in every column and is skipped.
+- Headline check against TPC: AS pre-tax top 1% 1960 = 10.38%, 2019 = 14.33% (TPC: 10% → 14%). After-tax block "4. After-tax National Income (408)": 1960 = 8.14%, 2019 = 9.18% (TPC: 8% → 9%).
+- Unit (AS paper, JPE 132(7), July 2024, doi 10.1086/728741, sec. on "Base Income Groups on Numbers of Individuals and Rank by Size-Adjusted Income"): groups contain equal numbers of **all individuals, including dependents**; tax units are ranked by income divided by the square root of the number of individuals in the unit. The plan's description ("individuals with income split within the tax unit, close to 992j") understates the difference from 992j (adults 20+, equal split between spouses). The methods page must use the paper's description.
+- AS's after-tax concept (408) is after-tax national income including in-kind transfers such as Medicare; it is not post-tax disposable cash income. The AS switch is therefore offered for pre-tax only. Open question for Adam whether to offer an AS post-tax comparison on a different concept.
+
+## V12. AS-adjusted distribution: smooth rescaling — CHANGED (Adam chose smooth rescaling)
+- The plan's method (scale every bin in a group by one factor, then re-solve thresholds) left bin averages falling at group edges by 4–8% (e.g. 2019: p50p51 average 3.8% below p49p50; p90p91 7.7% below p89p90). 49 of 61 years (1962–2022) failed the monotonicity check.
+- **Decision (Adam, 2026-10-21): smooth rescaling.** Factor is piecewise-linear in percentile rank with knots at 0, P50, P90, P99, P99.9, P99.99, P100; knot values minimize the sum of squared differences between neighbouring knots, subject to each of the six groups matching AS exactly (`build.smooth_factors`). Thresholds re-derived with the midpoint rule (V9).
+- Result: all 61 years pass validation; factors range from 0.54 to 1.32; group shares match AS to 1e-9 (2019: top 1% 14.33%, bottom 50% 15.75%). For James to review.
