@@ -2,6 +2,7 @@ import { ROUTES, matchRoute } from './routes';
 import { Link, useLocation, useScrollTopOnNavigate } from './app/router';
 import { useTheme } from './app/theme';
 import { Explore } from './pages/Explore';
+import { Top } from './pages/Top';
 
 const NAV = ['/', '/explore/', '/top/', '/methods/', '/sources/', '/about/'] as const;
 
@@ -45,6 +46,8 @@ export function App() {
       <main className="page">
         {route?.path === '/explore/' ? (
           <Explore />
+        ) : route?.path === '/top/' ? (
+          <Top />
         ) : (
           <div className="intro">
             <h1>{route ? route.title : 'Page not found'}</h1>
