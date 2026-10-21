@@ -19,3 +19,11 @@ Uniform per-group scaling broke monotonicity in 49 of 61 years; the build uses a
 
 ## 4. Gini from bins
 Computed with the trapezoid rule on the 127-bin Lorenz curve, which slightly understates the true Gini (your deck's point). The methods page will say so.
+
+## 5. Tax mode choices (engine/taxes.ts, model/taxRules.ts)
+- **Taxable base:** base = income × (AGI / national income) − deduction − exemption, with the ratio for the data year (2023: 0.659) used for every schedule, since every schedule is applied to today's incomes. The plan said "r_year for that year"; using the historical year's ratio (1963: 0.652) would barely differ here.
+- **Filing:** each equal-split adult is taxed on the single schedule. In 1953 and 1963 the standard deduction cap was $1,000 per return, so a married couple filing jointly got $500 each, while the per-adult model gives each adult up to $1,000. Small effect, but it slightly understates historical taxes on couples.
+- **"Proportional to income below the median":** read as transfers to adults below the median in proportion to their income. The other reading (in proportion to how far below the median) is a one-line change.
+- **Elasticity under effective-rate schedules:** there is no marginal rate, so the behavioural response uses the change in average rates by group. Statutory schedules use marginal rates at each bin's average income.
+- **Negative revenue:** if a schedule raises less than current taxes, the recycling rule charges the shortfall (e.g. an equal charge per adult) rather than leaving it unfunded.
+- Current-law comparisons use 2026 federal law (Rev. Proc. 2025-32), converted to 2023 dollars with CPI-U.
