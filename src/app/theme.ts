@@ -1,6 +1,8 @@
 /**
- * Light / dark mode. Default follows the system; a choice made with the
- * toggle is remembered in this browser (localStorage, best effort).
+ * Light / dark mode. Default follows the system, and is dark when the system
+ * doesn't ask for light (Adam, 2026-10-21). A choice made with the toggle is
+ * remembered in this browser (localStorage, best effort). index.html applies
+ * the same rule before first paint.
  */
 import { useCallback, useEffect, useState } from 'react';
 
@@ -17,7 +19,7 @@ function stored(): Theme | null {
 }
 
 function system(): Theme {
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
 
 export function useTheme(): [Theme, () => void] {
