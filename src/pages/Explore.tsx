@@ -1,10 +1,12 @@
 /** /explore: the calculator (plan 6.1). */
 import { useMemo } from 'react';
+import type { DataFile, Shape } from '../engine';
 import { fromDataFile, gini, groupShares, shapeOf } from '../engine';
 import { useCalculatorData } from '../app/useData';
 import { useViewState } from '../app/useViewState';
 import { useIncome } from '../app/income';
 import { IncomeForm, RankBar, toAnswers } from '../components/IncomeForm';
+import { CareerWealth } from '../components/CareerWealth';
 import { PresetCard } from '../components/PresetCard';
 import { ResultCard } from '../components/ResultCard';
 import { ScenarioPicker } from '../components/ScenarioPicker';
@@ -14,6 +16,17 @@ import { ShareHistory } from '../charts/ShareHistory';
 import { StretchedChart } from '../charts/StretchedChart';
 import { calculate } from '../model/calculate';
 import { presetList, resolve, seriesFor } from '../model/scenarios';
+
+// Every year's quantile function for a series, built once per series.
+const shapeCache = new WeakMap<DataFile, Map<number, Shape>>();
+function allShapes(file: DataFile): Map<number, Shape> {
+  let m = shapeCache.get(file);
+  if (!m) {
+    m = new Map(file.years.map((y) => [y, shapeOf(fromDataFile(file, y))] as const));
+    shapeCache.set(file, m);
+  }
+  return m;
+}
 
 export function Explore() {
   const loaded = useCalculatorData();
@@ -88,6 +101,12 @@ export function Explore() {
               calc={calc} scenarioLabel={resolved.scenario.label} todayYear={resolved.today.year}
               cpiRatio={macro.cpi.ratio} cpiThrough={macro.cpi.through} growthPenalty={state.growthPenalty}
               compToWages={compToWages}
+            />
+          )}
+          {resolved.ok && calc && shapes && (
+            <CareerWealth
+              percentile={calc.percentile} scenario={shapes.scenario} scenarioLabel={resolved.scenario.label}
+              shapes={allShapes(series)} cpiRatio={macro.cpi.ratio}
             />
           )}
           {resolved.ok && resolved.scenario.card && <PresetCard card={resolved.scenario.card} />}
