@@ -1,15 +1,29 @@
-# Calculate_America
+# Calculate America: Fair Share
 
 Calculate America is a platform of interactive tools that help people explore economic ideas, test policy scenarios, and imagine what a stronger, more functional system could look like.
 
-This repository currently contains the **Income Inequality Explorer** — a Vite + React + TypeScript + recharts app exploring U.S. income data from 1963 to 2024. Originally generated via Google AI Studio.
+**Fair Share** shows how the US economy divides its income and wealth, and what a person's income would be if the same total were divided differently. It will live at https://fairshare.calculateamerica.com. The build spec is [FAIRSHARE_PLAN.md](FAIRSHARE_PLAN.md).
 
-View the AI Studio source: https://ai.studio/apps/drive/1r4RCl_liDPuAYg3NwpDJG6_Fe-FnvPgy
+The previous AI Studio prototype is in `legacy/` for reference and will be removed once the rebuild reaches parity.
 
-## Run Locally
+## Develop
 
-**Prerequisites:** Node.js
+Requires Node 24. No API keys or environment variables.
 
-1. Install dependencies: `npm install`
-2. Create `.env.local` and set `GEMINI_API_KEY` to your Gemini API key
-3. Run the app: `npm run dev`
+```
+npm install
+npm run dev          # local dev server
+npm test             # unit tests (Vitest)
+npm run typecheck
+npm run build        # static site in dist/
+npm run preview      # serve the production build
+npm run test:e2e     # Playwright smoke tests against the build
+```
+
+## Deploy
+
+Static site on GitHub Pages, deployed by `.github/workflows/deploy.yml`. The build writes a copy of `index.html` at every route path (see `scripts/route-pages.ts`) because Pages has no single-page-app fallback.
+
+## License
+
+GPL-3.0. See [LICENSE](LICENSE).
