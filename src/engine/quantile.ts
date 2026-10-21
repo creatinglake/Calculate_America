@@ -31,6 +31,10 @@ export interface QuantileFn {
   fits: readonly BinFit['kind'][];
   /** Mean of the fitted curve over bin k, in closed form. */
   binMean(k: number): number;
+  /** Integral of income over percentiles [a, b], in closed form (income x population share). */
+  integral(a: number, b: number): number;
+  /** Average income of the people between percentiles a and b. */
+  meanBetween(a: number, b: number): number;
   dist: Distribution;
 }
 
@@ -144,7 +148,41 @@ export function buildQuantile(d: Distribution): QuantileFn {
     }
   };
 
-  return { q, rank, binMean, fits: fits.map((f) => f.kind), dist: d };
+  /** Integral of Q from the start of bin k to p (p inside bin k). */
+  const partial = (k: number, p: number): number => {
+    const f = fits[k]!, p0 = d.p0[k]!, p1 = d.p1[k]!;
+    if (p <= p0) return 0;
+    switch (f.kind) {
+      case 'spline': {
+        const x = -Math.log(1 - p);
+        const t = Math.min(1, Math.max(0, (x - f.x0) / f.h));
+        const { v } = hermite(t, f.f0, f.d0, f.s0, f.f1, f.d1, f.s1, f.h);
+        return Math.exp(-f.f0) - Math.exp(-v);
+      }
+      case 'power': {
+        const u = Math.min(1, (p - p0) / (p1 - p0));
+        return (p1 - p0) * (f.lo * u + ((f.hi - f.lo) * Math.pow(u, f.k + 1)) / (f.k + 1));
+      }
+      case 'tail': {
+        const e = 1 - 1 / f.alpha;
+        return (f.thr * Math.pow(1 - f.p0, 1 / f.alpha) * (Math.pow(1 - f.p0, e) - Math.pow(1 - p, e))) / e;
+      }
+    }
+  };
+
+  const integral = (a: number, b: number): number => {
+    if (!(a >= 0 && b <= 1 && a <= b)) throw new RangeError(`bad range [${a}, ${b}]`);
+    if (a === b) return 0;
+    const ka = binIndex(d.p0, a), kb = binIndex(d.p0, Math.min(b, 1 - 1e-15));
+    if (ka === kb) return partial(kb, b) - partial(ka, a);
+    let total = binMean(ka) * width(d, ka) - partial(ka, a);
+    for (let k = ka + 1; k < kb; k++) total += binMean(k) * width(d, k);
+    return total + (b >= 1 ? binMean(kb) * width(d, kb) : partial(kb, b));
+  };
+
+  const meanBetween = (a: number, b: number) => integral(a, b) / (b - a);
+
+  return { q, rank, binMean, integral, meanBetween, fits: fits.map((f) => f.kind), dist: d };
 }
 
 function isIncreasing(fit: BinFit, p0: number, p1: number, lo: number, hi: number): boolean {
