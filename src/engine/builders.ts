@@ -35,8 +35,6 @@ export function deriveThresholds(avg: readonly number[]): number[] {
   return thr;
 }
 
-const KNOTS = [0, 0.5, 0.9, 0.99, 0.999, 0.9999, 1];
-
 /** Solve A x = b by Gaussian elimination with partial pivoting. */
 function solve(A: number[][], b: number[]): number[] {
   const n = b.length;
@@ -60,48 +58,66 @@ function solve(A: number[][], b: number[]): number[] {
 }
 
 /**
- * Per-bin scale factors, piecewise-linear in rank with knots at the group
- * edges, chosen as the smoothest factors (least squared change between
- * neighbouring knots) that make every group's share exactly its target.
- * Same method as the pipeline's Auten-Splinter rescaling (build.smooth_factors).
+ * Per-bin scale factors that move every group to its target share while
+ * changing incomes inside each group as evenly as possible. Each group's
+ * factor is a straight line in rank, a + b·t, with t running from -1/2 at the
+ * group's bottom to +1/2 at its top. The slopes are as small as possible
+ * (least sum of b²) subject to two rules: each group's share is exactly its
+ * target, and the top of each group still has no more than the bottom of the
+ * group above. When that second rule doesn't bind, every slope is zero and
+ * each group is scaled by one number.
  */
-export function smoothFactors(d: Distribution, target: GroupShares): number[] {
+export function evenFactors(d: Distribution, target: GroupShares): number[] {
   const shares = d.avg.map((a, i) => (d.p1[i]! - d.p0[i]!) * a);
   const total = shares.reduce((a, b) => a + b, 0);
-  const n = KNOTS.length;
-  const basis = d.p0.map((p0, i) => {
-    const m = (p0 + d.p1[i]!) / 2;
+  const G = GROUP_KEYS.length, n = 2 * G;
+  const bins = GROUP_KEYS.map((g) => groupBins(d.p0, d.p1, g));
+  const pos = new Array<number>(d.avg.length).fill(0);
+  bins.forEach((idx, g) => {
+    const [lo, hi] = GROUP_RANGE[GROUP_KEYS[g]!];
+    for (const i of idx) pos[i] = ((d.p0[i]! + d.p1[i]!) / 2 - lo) / (hi - lo) - 0.5;
+  });
+  // Equality rows: group shares. Variables are [a_0..a_5, b_0..b_5].
+  const eq: number[][] = bins.map((idx, g) => {
     const row = new Array<number>(n).fill(0);
-    for (let k = 0; k < n - 1; k++) {
-      if (m >= KNOTS[k]! && m <= KNOTS[k + 1]!) {
-        const t = (m - KNOTS[k]!) / (KNOTS[k + 1]! - KNOTS[k]!);
-        row[k] = 1 - t;
-        row[k + 1] = t;
-        break;
-      }
-    }
+    for (const i of idx) { row[g]! += shares[i]! / total; row[G + g]! += (shares[i]! / total) * pos[i]!; }
     return row;
   });
-  const A = GROUP_KEYS.map((g) => {
+  const eqRhs = GROUP_KEYS.map((g) => target[g]);
+  // Edge rows: (bottom bin of the group above) − (top bin of this group) ≥ 0.
+  const edge: number[][] = [];
+  for (let g = 0; g < G - 1; g++) {
+    const top = bins[g]![bins[g]!.length - 1]!, bot = bins[g + 1]![0]!;
     const row = new Array<number>(n).fill(0);
-    for (const i of groupBins(d.p0, d.p1, g)) for (let k = 0; k < n; k++) row[k]! += (shares[i]! / total) * basis[i]![k]!;
-    return row;
-  });
-  // D'D for first differences
-  const DtD = Array.from({ length: n }, (_, i) =>
-    Array.from({ length: n }, (_, j) => {
-      if (i === j) return i === 0 || i === n - 1 ? 1 : 2;
-      return Math.abs(i - j) === 1 ? -1 : 0;
-    }),
-  );
-  const m = GROUP_KEYS.length;
-  const K = [
-    ...DtD.map((row, i) => [...row.map((v) => 2 * v), ...A.map((a) => a[i]!)]),
-    ...A.map((a) => [...a, ...new Array<number>(m).fill(0)]),
-  ];
-  const rhs = [...new Array<number>(n).fill(0), ...GROUP_KEYS.map((g) => target[g])];
-  const knots = solve(K, rhs).slice(0, n);
-  return basis.map((row) => row.reduce((a, w, k) => a + w * knots[k]!, 0));
+    row[g + 1] = d.avg[bot]!; row[G + g + 1] = d.avg[bot]! * pos[bot]!;
+    row[g] = -d.avg[top]!; row[G + g] = -d.avg[top]! * pos[top]!;
+    edge.push(row);
+  }
+  const dot = (r: number[], x: number[]) => r.reduce((a, v, k) => a + v * x[k]!, 0);
+  // A convex problem with few constraints: try every set of binding edges,
+  // keep the feasible solution with the smallest objective.
+  let best: number[] | null = null, bestObj = Infinity;
+  for (let mask = 0; mask < 1 << edge.length; mask++) {
+    const rows = [...eq, ...edge.filter((_, k) => mask & (1 << k))];
+    const rhs = [...eqRhs, ...rows.slice(G).map(() => 0)];
+    const m = rows.length;
+    const K = [
+      ...Array.from({ length: n }, (_, i) => [
+        ...Array.from({ length: n }, (_, j) => (i === j && i >= G ? 2 : 0)),
+        ...rows.map((r) => r[i]!),
+      ]),
+      ...rows.map((r) => [...r, ...new Array<number>(m).fill(0)]),
+    ];
+    const x = solve(K, [...new Array<number>(n).fill(0), ...rhs]).slice(0, n);
+    if (x.some((v) => !Number.isFinite(v))) continue;
+    if (edge.some((r) => dot(r, x) < -1e-9 * total)) continue;
+    const obj = x.slice(G).reduce((a, b) => a + b * b, 0);
+    if (obj < bestObj - 1e-15) { best = x; bestObj = obj; }
+  }
+  if (!best) return d.avg.map(() => NaN);
+  const f = new Array<number>(d.avg.length).fill(NaN);
+  bins.forEach((idx, g) => { for (const i of idx) f[i] = best![g]! + best![G + g]! * pos[i]!; });
+  return f;
 }
 
 /** True when every group earns more per person than the group below it. */
@@ -112,7 +128,7 @@ export function perPersonOrdered(target: GroupShares): boolean {
 
 /**
  * Build a distribution with the given group shares, keeping the shape of
- * `reference` inside groups (smoothly rescaled). Fails with 'order' if a
+ * `reference` inside groups (see evenFactors). Fails with 'order' if a
  * lower group would earn more per person than a higher one, or 'shape' if
  * the result isn't increasing.
  */
@@ -120,10 +136,10 @@ export function fromGroupShares(reference: Distribution, target: GroupShares): B
   const sum = GROUP_KEYS.reduce((a, g) => a + target[g], 0);
   if (Math.abs(sum - 1) > 1e-6 || GROUP_KEYS.some((g) => target[g] < 0)) return { ok: false, reason: 'sum' };
   if (!perPersonOrdered(target)) return { ok: false, reason: 'order' };
-  const f = smoothFactors(reference, target);
+  const f = evenFactors(reference, target);
   if (f.some((v) => !(v > 0))) return { ok: false, reason: 'shape' };
   const avg = reference.avg.map((a, i) => a * f[i]!);
-  for (let i = 1; i < avg.length; i++) if (avg[i]! < avg[i - 1]!) return { ok: false, reason: 'shape' };
+  for (let i = 1; i < avg.length; i++) if (avg[i]! < avg[i - 1]! * (1 - 1e-9)) return { ok: false, reason: 'shape' };
   return { ok: true, dist: { p0: reference.p0, p1: reference.p1, avg, thr: deriveThresholds(avg) } };
 }
 

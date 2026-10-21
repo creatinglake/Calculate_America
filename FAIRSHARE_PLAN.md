@@ -281,7 +281,7 @@ Summarized from above, since this is the central design problem:
 
 - **Host (decided 2026-10-20):** GitHub Pages, deployed from `main` by GitHub Actions. No per-PR preview deploys; Adam reviews each PR locally with `npm run dev` / `npm run preview`.
 - Build command `npm run build`, output `dist`. GitHub Pages has no SPA fallback, so the build copies `index.html` to every route path and to `404.html`.
-- **Domains (decided 2026-10-20):** Fair Share lives at **fairshare.calculateamerica.com** (CNAME in `public/CNAME`). The apex calculateamerica.com redirects there via GoDaddy forwarding until other Calculate America tools exist. Registrar and DNS: **GoDaddy**.
+- **Domains (decided 2026-10-20):** Fair Share lives at **fairshare.calculateamerica.com** (CNAME in `public/CNAME`). Update (2026-10-21): the apex calculateamerica.com keeps serving the old prototype (hosted on Google) for comparison while the new site is refined; redirecting it to the subdomain is deferred until Adam says so. Registrar and DNS: **GoDaddy**.
 - **Analytics (decided 2026-10-20):** none. Keep it easy to add a cookie-free script later; nothing to build now.
 - Social sharing: Open Graph image per page; scenario links generate a readable title ("If America's income were divided like 1963").
 - Launch checklist: GitHub Pages enabled (repo public, or a paid plan); all VERIFY items resolved and logged in `pipeline/VERIFICATION.md`; methods page reviewed by James; Lighthouse ≥ 90; tested on iPhone Safari and Android Chrome widths; 404 page; sources page complete.

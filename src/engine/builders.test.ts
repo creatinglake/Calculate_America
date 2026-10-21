@@ -1,9 +1,9 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { blend, fromGroupShares, parametric, perPersonOrdered, setGroupShare, thresholdLadder } from './builders';
+import { blend, evenFactors, fromGroupShares, parametric, perPersonOrdered, setGroupShare, thresholdLadder } from './builders';
 import { shapeOf } from './counterfactual';
 import { fromDataFile, mean } from './distribution';
-import { GROUP_KEYS, type GroupShares } from './groups';
+import { GROUP_KEYS, groupBins, type GroupShares } from './groups';
 import { buildQuantile } from './quantile';
 import { gini, groupShares } from './stats';
 import { loadData } from './test/data';
@@ -41,6 +41,29 @@ describe('group shares builder', () => {
     // Valid distribution: the quantile function builds and is increasing.
     const Q = buildQuantile(r.dist);
     expect(Q.q(0.95)).toBeGreaterThan(Q.q(0.5));
+  });
+
+  it('scales each group by one number when that keeps the order', () => {
+    const g = groupShares(ref);
+    const target = { ...g, b50: g.b50 - 0.005, m40: g.m40 + 0.005 };
+    const f = evenFactors(ref, target);
+    for (const k of GROUP_KEYS) {
+      const idx = groupBins(ref.p0, ref.p1, k);
+      for (const i of idx) expect(f[i]).toBeCloseTo(target[k] / g[k], 9);
+    }
+  });
+
+  it('bends only as much as needed to keep incomes rising at group edges', () => {
+    // 1928-style: the bottom half gains while the middle 40% loses.
+    const g = groupShares(ref);
+    const target = { ...g, b50: g.b50 + 0.02, m40: g.m40 - 0.02 };
+    const r = fromGroupShares(ref, target);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    for (let i = 1; i < r.dist.avg.length; i++) expect(r.dist.avg[i]).toBeGreaterThanOrEqual(r.dist.avg[i - 1]! * (1 - 1e-9));
+    // Groups the change doesn't reach keep one factor.
+    const f = evenFactors(ref, target);
+    for (const i of groupBins(ref.p0, ref.p1, 't001')) expect(f[i]).toBeCloseTo(1, 9);
   });
 
   it('rejects a lower group earning more per person than a higher one', () => {

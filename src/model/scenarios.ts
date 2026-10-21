@@ -3,7 +3,7 @@
  * engine compares: "today" and the scenario. Pure: takes loaded data files.
  */
 import {
-  blend, fromDataFile, fromGroupShares, mean, mostEqualYear, parametric,
+  blend, fromDataFile, fromGroupShares, groupShares, mean, mostEqualYear, parametric,
   type DataFile, type Distribution, type GroupShares, type Scenario, type ViewState,
 } from '../engine';
 import type { Comparisons, Presets } from '../data/load';
@@ -95,6 +95,8 @@ function resolvePreset(id: string, data: Data, series: DataFile, today: Distribu
     const ga = data.presets.gildedAge;
     const r = fromGroupShares(today, ga.groups.central as unknown as GroupShares);
     if (!r.ok) return "The 1928 preset could not be built on this year's shape.";
+    const now = groupShares(today);
+    const tilts = ga.groups.central.b50! > now.b50 && ga.groups.central.m40! < now.m40;
     const b50 = (k: 'low' | 'high') => `${(ga.groups[k].b50! * 100).toFixed(1)}%`;
     return {
       dist: r.dist, label: 'Gilded Age (US 1928)',
@@ -104,7 +106,11 @@ function resolvePreset(id: string, data: Data, series: DataFile, today: Distribu
           'Only the top of the distribution is observed for 1928: the shares of the top 10%, 1%, 0.1% and 0.01%.',
           'How the bottom 90% was split is an assumption: we use the 1962 split between the bottom 50% and the middle 40%. '
             + `With that split 25% lower or higher, the bottom 50% would get between ${b50('low')} and ${b50('high')} of income.`,
-          `Inside each group, incomes follow today's shape.`,
+          ...(tilts
+            ? ['The bottom 50% gains and the middle 40% loses. Scaling each group evenly would leave the best-off of the '
+              + 'bottom half above the worst-off of the middle 40%, so incomes inside those groups tilt just enough to keep '
+              + 'everyone in order: the middle 40%\'s loss falls mostly on its upper end.']
+            : [`Inside each group, incomes follow today's shape.`]),
         ],
         source: 'World Inequality Database (Piketty and Saez top income shares).',
       },
