@@ -278,13 +278,12 @@ Summarized from above, since this is the central design problem:
 
 ## 11. Hosting and launch
 
-- **Host:** Cloudflare Pages (free, global CDN, automatic HTTPS, builds from GitHub on push). Alternatives: Netlify, GitHub Pages. **ASK ADAM** which he prefers and where calculateamerica.com is registered (registrar and DNS provider), since DNS records must change there.
-- Build command `npm run build`, output `dist`. Single-page-app fallback to `index.html`.
-- Domains: calculateamerica.com and www.calculateamerica.com, one redirecting to the other. Fair Share at `/` initially; the site is structured so future Calculate America tools can live at `/fair-share`, `/other-tool` (put Fair Share at `/fair-share` with `/` as a Calculate America landing page if Adam prefers; **ASK ADAM**).
-- Preview deploys for every PR so Adam can review before merging.
-- Analytics: none by default. Offer Cloudflare Web Analytics (cookie-free) as an option. **ASK ADAM**.
+- **Host (decided 2026-10-20):** GitHub Pages, deployed from `main` by GitHub Actions. No per-PR preview deploys; Adam reviews each PR locally with `npm run dev` / `npm run preview`.
+- Build command `npm run build`, output `dist`. GitHub Pages has no SPA fallback, so the build copies `index.html` to every route path and to `404.html`.
+- **Domains (decided 2026-10-20):** Fair Share lives at **fairshare.calculateamerica.com** (CNAME in `public/CNAME`). The apex calculateamerica.com redirects there via GoDaddy forwarding until other Calculate America tools exist. Registrar and DNS: **GoDaddy**.
+- **Analytics (decided 2026-10-20):** none. Keep it easy to add a cookie-free script later; nothing to build now.
 - Social sharing: Open Graph image per page; scenario links generate a readable title ("If America's income were divided like 1963").
-- Launch checklist: all VERIFY items resolved and logged in `pipeline/VERIFICATION.md`; methods page reviewed by James; Lighthouse ≥ 90; tested on iPhone Safari and Android Chrome widths; 404 page; sources page complete.
+- Launch checklist: GitHub Pages enabled (repo public, or a paid plan); all VERIFY items resolved and logged in `pipeline/VERIFICATION.md`; methods page reviewed by James; Lighthouse ≥ 90; tested on iPhone Safari and Android Chrome widths; 404 page; sources page complete.
 
 ---
 
