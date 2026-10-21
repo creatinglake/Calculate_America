@@ -5,6 +5,9 @@ import { Explore } from './pages/Explore';
 import { Top } from './pages/Top';
 import { Taxes } from './pages/Taxes';
 import { Wealth } from './pages/Wealth';
+import { Sources } from './pages/Sources';
+import { About } from './pages/About';
+import { Ethics } from './pages/Ethics';
 
 // The logo links to the story at /.
 const NAV = ['/explore/', '/top/', '/taxes/', '/wealth/', '/methods/', '/sources/', '/about/'] as const;
@@ -56,6 +59,12 @@ export function App() {
           <Taxes />
         ) : route?.path === '/wealth/' ? (
           <Wealth />
+        ) : route?.path === '/sources/' ? (
+          <Sources />
+        ) : route?.path === '/about/' ? (
+          <About />
+        ) : route?.path === '/ethics/' ? (
+          <Ethics />
         ) : (
           <div className="intro">
             <h1>{route ? route.title : 'Page not found'}</h1>
@@ -64,7 +73,11 @@ export function App() {
         )}
       </main>
       <footer className="site-foot">
-        <p>Fair Share is a Calculate America tool. Data: World Inequality Database, Piketty, Saez and Zucman; Auten and Splinter; BEA; BLS; IRS. See Sources.</p>
+        <p>
+          Fair Share is a Calculate America tool. Data: World Inequality Database (Piketty, Saez and Zucman); Auten and
+          Splinter; Federal Reserve; BEA; BLS; IRS. See <Link href="/sources/">Sources</Link>,{' '}
+          <Link href="/methods/">Methods</Link> and <Link href="/ethics/">The case</Link>.
+        </p>
       </footer>
     </>
   );

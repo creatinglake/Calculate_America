@@ -6,6 +6,9 @@ const HEADINGS: Record<string, string> = {
   '/top/': 'Ten times smaller, again and again',
   '/taxes/': "Today's incomes, taxed another way",
   '/wealth/': 'What you own, divided another way',
+  '/sources/': 'Where every number comes from',
+  '/about/': 'About Fair Share',
+  '/ethics/': 'Why distribution matters',
 };
 
 for (const { path, title } of ROUTES) {
