@@ -101,3 +101,14 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 - The plan's method (scale every bin in a group by one factor, then re-solve thresholds) left bin averages falling at group edges by 4–8% (e.g. 2019: p50p51 average 3.8% below p49p50; p90p91 7.7% below p89p90). 49 of 61 years (1962–2022) failed the monotonicity check.
 - **Decision (Adam, 2026-10-21): smooth rescaling.** Factor is piecewise-linear in percentile rank with knots at 0, P50, P90, P99, P99.9, P99.99, P100; knot values minimize the sum of squared differences between neighbouring knots, subject to each of the six groups matching AS exactly (`build.smooth_factors`). Thresholds re-derived with the midpoint rule (V9).
 - Result: all 61 years pass validation; factors range from 0.54 to 1.32; group shares match AS to 1e-9 (2019: top 1% 14.33%, bottom 50% 15.75%). For James to review.
+
+## V13. Federal Reserve DFA — OK (license OPEN)
+- Downloaded https://www.federalreserve.gov/releases/z1/dataviz/download/zips/dfa.zip (Last-Modified 18 Sep 2026, retrieved 2026-10-21). CSV files; used `dfa-networth-shares.csv` (columns Date, Category, Net worth, …).
+- Groups (`Category`): TopPt1 (top 0.1%), RemainingTop1 (99–99.9), Next9 (90–99), Next40 (50–90), Bottom50. Shares in percent, one decimal.
+- Quarters: 1989:Q3 to **2026:Q2** (148 quarters). Every quarter sums to 100 within 0.3 points.
+- Unit: households. The DFA overview page (https://www.federalreserve.gov/releases/z1/dataviz/dfa/, read 2026-10-21) describes it as the distribution of "household wealth" by percentile group. Group totals only, no thresholds.
+- Output `us-dfa-wealth.json`: history chart only, labeled "households", never mixed into the 992j bins.
+- License/reuse terms: not yet checked.
+
+## V14. Latest `hweal` year — OK
+- `shwealj992` 2024 is identical to 2023 in all 127 bins (same carry-forward as V3). Latest estimated wealth year: 2023, matching income.
