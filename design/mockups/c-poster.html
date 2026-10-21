@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fair Share: Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&display=swap">
+<style>
+:root{--bg:#FFFFFF;--surface:#FFF6DD;--ink:#16130F;--muted:#55504A;--rule:#16130F;--accent:#2340CC;--on-accent:#FFFFFF;--line-now:#16130F;--line-base:#2340CC;--band:#E9F0FF;--b50:#2A72AD;--m40:#3D8F5A;--u9:#8A6500;--t09:#D2571F;--t009:#C2306A;--t001:#6A2FB0;--b50-ink:#FFFFFF;--m40-ink:#16130F;--u9-ink:#FFFFFF;--t09-ink:#16130F;--t009-ink:#FFFFFF;--t001-ink:#FFFFFF;color-scheme:light;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121116;--surface:#1D1B24;--ink:#F6F2EA;--muted:#B8B2A8;--rule:#F6F2EA;--accent:#8FA4FF;--on-accent:#121116;--line-now:#F6F2EA;--line-base:#8FA4FF;--band:#191A28;--b50:#5AA8E6;--m40:#5CBF7D;--u9:#E0B23A;--t09:#FF8A4C;--t009:#FF6FA3;--t001:#B88CFF;--b50-ink:#121116;--m40-ink:#121116;--u9-ink:#121116;--t09-ink:#121116;--t009-ink:#121116;--t001-ink:#121116;color-scheme:dark;}}
+:root[data-theme="dark"]{--bg:#121116;--surface:#1D1B24;--ink:#F6F2EA;--muted:#B8B2A8;--rule:#F6F2EA;--accent:#8FA4FF;--on-accent:#121116;--line-now:#F6F2EA;--line-base:#8FA4FF;--band:#191A28;--b50:#5AA8E6;--m40:#5CBF7D;--u9:#E0B23A;--t09:#FF8A4C;--t009:#FF6FA3;--t001:#B88CFF;--b50-ink:#121116;--m40-ink:#121116;--u9-ink:#121116;--t09-ink:#121116;--t009-ink:#121116;--t001-ink:#121116;color-scheme:dark;}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);overflow-wrap:break-word}
+a{color:var(--accent)}
+img,svg{max-width:100%}
+.g-b50{background:var(--b50);color:var(--b50-ink)}.g-m40{background:var(--m40);color:var(--m40-ink)}
+.g-u9{background:var(--u9);color:var(--u9-ink)}.g-t09{background:var(--t09);color:var(--t09-ink)}
+.g-t009{background:var(--t009);color:var(--t009-ink)}.g-t001{background:var(--t001);color:var(--t001-ink)}
+.site-inner{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1.25rem}
+.brand{text-decoration:none;color:var(--ink);display:flex;flex-direction:column;line-height:1.1}
+nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.25rem 1rem}
+nav a{color:var(--ink);text-decoration:none;padding:.25rem 0;display:inline-block}
+nav a[aria-current]{color:var(--accent);text-decoration:underline;text-underline-offset:.3em;text-decoration-thickness:2px}
+.theme-toggle{font:inherit;font-size:.8rem;background:transparent;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:.3rem .7rem;cursor:pointer}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.result-grid{margin:0}.result-grid dd{margin:0;font-variant-numeric:tabular-nums lining-nums}
+.bars{margin:1.25rem 0 1rem}
+.bar{display:flex;gap:2px;height:44px}
+.seg{position:relative;min-width:1px;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:.8rem;font-weight:600;font-variant-numeric:tabular-nums}
+.seg-label{white-space:nowrap}
+.bar-label{margin:.9rem 0 .35rem;font-size:.85rem;color:var(--muted)}
+.inset-wrap .bar-label{margin-top:0}
+.bar-inset{height:34px}
+.connector{display:block;width:100%;height:28px}
+.connector polygon{fill:var(--rule);opacity:.7}
+.legend{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+.legend th,.legend td{text-align:right;padding:.4rem .3rem;border-bottom:1px solid var(--rule)}
+.legend th:first-child{text-align:left;font-weight:500}
+.legend thead th{font-weight:600;color:var(--muted);font-size:.78rem}
+.sw{display:inline-block;width:.8em;height:.8em;margin-right:.5em;vertical-align:-.05em}
+.pc{position:relative;margin:1rem 0 0 2.9rem}
+.pc-bands{position:relative;height:2.6rem;font-size:.72rem;line-height:1.2}
+.blab{position:absolute;bottom:.3rem;width:25%;padding-left:.3rem;color:var(--muted)}
+.blab b{display:block;color:var(--ink);font-weight:600}
+.pc-plot{position:relative;height:clamp(260px,52vw,400px);margin-bottom:1rem}
+.pc-plot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.grid{stroke:var(--rule);stroke-width:1;vector-effect:non-scaling-stroke}
+.band{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.ln{fill:none;stroke-width:2.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.ln-now{stroke:var(--line-now)}.ln-base{stroke:var(--line-base);stroke-dasharray:7 4}
+.you-link{stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.pc-plot{--plot-bg:var(--surface)}
+.you-label,.line-label{text-shadow:0 0 3px var(--plot-bg),0 0 3px var(--plot-bg),0 0 6px var(--plot-bg)}
+.ylab{position:absolute;right:calc(100% + .4rem);transform:translateY(-50%);font-size:.72rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.dot{position:absolute;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--surface)}
+.dot-now{background:var(--line-now)}.dot-base{background:var(--line-base)}
+.you-label{position:absolute;transform:translate(.7rem,.5rem);font-size:.78rem;font-weight:600;line-height:1.3;white-space:nowrap;color:var(--ink)}
+.you-label span{font-weight:400;color:var(--muted)}
+.line-label{position:absolute;transform:translate(-50%,-160%);font-size:.78rem;font-weight:700;white-space:nowrap}
+.lab-base{color:var(--line-base);transform:translate(-30%,100%)}.lab-now{color:var(--line-now);transform:translate(-100%,-150%)}
+.table-toggle{margin:.5rem 0;font-size:.9rem}
+.table-toggle summary{cursor:pointer;color:var(--accent);font-weight:600}
+.table-toggle table{width:100%;border-collapse:collapse;margin-top:.5rem;font-variant-numeric:tabular-nums}
+.table-toggle th,.table-toggle td{text-align:right;padding:.35rem .3rem;border-bottom:1px solid var(--rule)}
+.table-toggle th:first-child{text-align:left}
+.source{font-size:.78rem;color:var(--muted);margin:.6rem 0 0}
+.button{display:inline-block;text-decoration:none;background:var(--accent);color:var(--on-accent);font-weight:700;padding:.85rem 1.5rem}
+@media (max-width:480px){.col-63{display:none}.pc{margin-left:2.6rem}.blab span{display:none}.pc-bands{height:1.8rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+
+body{font-family:'DM Sans',system-ui,sans-serif;font-size:1.15rem;line-height:1.6}
+h1,h2,h3,.brand-tool,.result-grid dd{font-family:'DM Serif Display',Georgia,serif;font-weight:400}
+.site{padding:1rem 16px;border-bottom:3px solid var(--ink)}
+.site-inner{max-width:62rem;margin:0 auto}
+.brand{flex-direction:row;align-items:center;gap:.6rem}
+.brand-org{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:var(--ink);color:var(--bg);padding:.2rem .5rem}
+.brand-tool{font-size:1.5rem}
+nav{margin-left:auto}
+nav ul{font-weight:700;font-size:.95rem}
+nav a[aria-current]{text-decoration:none;color:var(--ink);background:var(--surface);border:2px solid var(--ink);padding:.15rem .6rem;border-radius:999px}
+.theme-toggle{border:2px solid var(--ink);color:var(--ink);font-weight:700}
+main{padding:0}
+main>section,main>figure{padding-left:16px;padding-right:16px}
+main>*>*{max-width:46rem;margin-left:auto!important;margin-right:auto!important}
+.hero{background:var(--surface);padding-top:3.5rem;padding-bottom:3.5rem;border-bottom:3px solid var(--ink)}
+.kicker{display:inline-block;font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem;color:var(--accent);margin-bottom:1rem}
+.hero .kicker{display:block}
+h1{font-size:clamp(2.6rem,9vw,5rem);line-height:1;margin-top:0;margin-bottom:1.25rem;letter-spacing:-.01em}
+.dek{font-size:1.3rem;line-height:1.5;margin-top:0;margin-bottom:0}
+.result{padding-top:3rem;padding-bottom:3rem}
+.result>*{max-width:46rem}
+.result-top,.result-who,.result-grid,.assumption,.fine{position:relative}
+.result-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.result-title{font-size:2rem;margin:0}
+.tag{font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;background:var(--ink);color:var(--bg);padding:.25rem .6rem;border-radius:999px}
+.result-who{font-size:1.2rem}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.result-grid>div{border:3px solid var(--ink);border-radius:18px;padding:1rem 1.1rem;background:var(--bg);box-shadow:5px 5px 0 var(--ink)}
+.r-arrow{display:none}
+.result-grid dt{font-weight:700;font-size:.9rem}
+.result-grid dd{font-size:clamp(2.2rem,8vw,3.6rem);line-height:1.05}
+.r-cf{background:var(--surface)!important}
+.r-cf dd{color:var(--accent)}
+.r-diff{grid-column:1/-1;background:var(--accent)!important;color:var(--on-accent)}
+.r-diff dt{color:var(--on-accent)}
+.r-diff dd{font-size:clamp(2.6rem,10vw,4.5rem)}
+.assumption{font-size:1.2rem;font-weight:500;margin-top:1.75rem;margin-bottom:.5rem}
+.assumption-label{font-weight:800;color:var(--accent)}
+.fine{font-size:.85rem;color:var(--muted);margin-top:0}
+.prose{padding-top:1rem;padding-bottom:1rem}
+.prose h2{font-size:clamp(2rem,6vw,2.8rem);line-height:1.1;margin-top:1.5rem;margin-bottom:.75rem}
+.prose p{margin-top:0;margin-bottom:1.1rem}
+.chart{background:var(--band);margin:2rem 0;padding-top:2.5rem;padding-bottom:2.5rem;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink)}
+.chart-num{display:inline-block;font-weight:800;font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-top:0;margin-bottom:.25rem}
+.chart figcaption{display:block}
+.chart h3{font-size:clamp(1.7rem,5vw,2.3rem);line-height:1.1;margin-top:0;margin-bottom:.4rem}
+.chart-sub{margin-top:0;color:var(--muted)}
+.bars,.legend,.pc,.table-toggle,.source{max-width:46rem}
+.pc{margin-left:auto!important;margin-right:auto!important;padding-left:2.9rem}
+.pc-plot{background:var(--bg);border:2px solid var(--ink);--plot-bg:var(--bg)}
+.connector polygon{opacity:.3}
+.bar{height:52px;gap:3px}
+.bar-inset{height:40px}
+.seg{border-radius:4px;font-size:.85rem;font-weight:800}
+.bar-label{font-weight:700;color:var(--ink)}
+.legend{margin-top:1rem}
+.legend th,.legend td{border-bottom:2px solid var(--ink)}
+.sw{border-radius:50%}
+.cta{text-align:center;padding-top:3.5rem;padding-bottom:4rem}
+.cta h2{font-size:clamp(2.4rem,8vw,4rem);line-height:1;margin-top:0;margin-bottom:.75rem}
+.cta p{color:var(--muted);margin-bottom:1.75rem}
+.button{font-size:1.15rem;border:3px solid var(--ink);border-radius:999px;box-shadow:5px 5px 0 var(--ink);padding:1rem 2rem}
+.site-foot{border-top:3px solid var(--ink);padding:1.5rem 16px;font-size:.85rem;color:var(--muted);text-align:center}
+@media (max-width:640px){nav{margin-left:0;order:3;width:100%}.result-grid{grid-template-columns:1fr}}
+@media (max-width:480px){.pc{padding-left:2.6rem}}
+
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="site-inner">
+    <a class="brand" href="#"><span class="brand-org">Calculate America</span><span class="brand-tool">Fair Share</span></a>
+    <nav aria-label="Main"><ul><li><a href="#" aria-current="page">Story</a></li><li><a href="#">Calculator</a></li><li><a href="#">The top</a></li><li><a href="#">Methods</a></li><li><a href="#">Sources</a></li><li><a href="#">About</a></li></ul></nav>
+    <button class="theme-toggle" type="button" aria-label="Color theme: follow system">Theme: auto</button>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <p class="kicker">Fair Share</p>
+  <h1>Same size economy, divided another way</h1>
+  <p class="dek">Find your place in how America divides its income today, then see what someone at that place would receive if the same total were divided the way it was in 1963.</p>
+</section>
+<section class="result" aria-labelledby="result-h">
+  <div class="result-top">
+    <h2 id="result-h" class="result-title">A sample result</h2>
+    <span class="tag">Illustrative, approximate</span>
+  </div>
+  <p class="result-who">An adult with <strong>$60,000</strong> of pre-tax income in 2023, higher than about 57% of adults.</p>
+  <dl class="result-grid">
+    <div class="r-now"><dt>Your income, 2023</dt><dd>$60,000</dd></div>
+    <div class="r-arrow" aria-hidden="true"><span>&rarr;</span></div>
+    <div class="r-cf"><dt>Under the 1963 shape</dt><dd>$76,800</dd></div>
+    <div class="r-diff"><dt>Difference per year</dt><dd>+$16,800</dd></div>
+  </dl>
+  <p class="assumption"><span class="assumption-label">Assumption.</span> Same average income per adult as 2023; only how it is divided changes.</p>
+  <p class="fine">Pre-tax national income per adult age 20 and over, with income split equally between spouses, in 2023 dollars. Your rank is approximate.</p>
+</section>
+<section class="prose">
+  <h2>How the income is divided</h2>
+  <p>In 2023, pre-tax income in the United States averaged $89,400 per adult. That total is not spread evenly. The bottom half of adults received 13.5% of it. The top 1% received 20.7%.</p>
+  <p>In 1963 the economy was smaller, $36,800 per adult in 2023 dollars, and it was divided differently. The bottom half received 19.0% and the top 1% received 13.0%. Fair Share keeps today's total fixed and changes only the division.</p>
+</section>
+<figure class="chart chart-bars" aria-labelledby="bars-h">
+  <figcaption>
+    <p class="chart-num">Chart 2</p>
+    <h3 id="bars-h">Share of adults and share of income, 2023</h3>
+    <p class="chart-sub">Six groups of adults, ordered by income. The top groups are slivers of the people but blocks of the income.</p>
+  </figcaption>
+  <div class="bars" role="img" aria-label="In 2023 the bottom 50% of adults received 13.5% of pre-tax income; the top 1% received 20.7%. Full values in the table below.">
+    <div class="inset-wrap">
+      <p class="bar-label">The top 1% of adults, magnified 100 times</p>
+      <div class="bar bar-inset"><div class="seg g-t09" style="flex-basis:90.0000%"><span class="seg-label">90%</span></div><div class="seg g-t009" style="flex-basis:9.0000%"><span class="seg-label">9%</span></div><div class="seg g-t001" style="flex-basis:1.0000%"></div></div>
+      <svg class="connector" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,0 100,0 100,10 99,10"/></svg>
+    </div>
+    <p class="bar-label">Share of adults</p>
+    <div class="bar bar-people"><div class="seg g-b50" style="flex-basis:50.0000%"><span class="seg-label">50%</span></div><div class="seg g-m40" style="flex-basis:40.0000%"><span class="seg-label">40%</span></div><div class="seg g-u9" style="flex-basis:9.0000%"></div><div class="seg g-t09" style="flex-basis:0.9000%"></div><div class="seg g-t009" style="flex-basis:0.0900%"></div><div class="seg g-t001" style="flex-basis:0.0100%"></div></div>
+    <p class="bar-label bar-label-income">Share of income</p>
+    <div class="bar bar-income"><div class="seg g-b50" style="flex-basis:13.4600%"><span class="seg-label">13.5%</span></div><div class="seg g-m40" style="flex-basis:39.8000%"><span class="seg-label">39.8%</span></div><div class="seg g-u9" style="flex-basis:26.0200%"><span class="seg-label">26.0%</span></div><div class="seg g-t09" style="flex-basis:10.7900%"><span class="seg-label">10.8%</span></div><div class="seg g-t009" style="flex-basis:5.2200%"></div><div class="seg g-t001" style="flex-basis:4.7300%"></div></div>
+  </div>
+  <table class="legend">
+    <thead><tr><th scope="col">Group</th><th scope="col">Adults</th><th scope="col">Income, 2023</th><th scope="col" class="col-63">Income, 1963</th></tr></thead>
+    <tbody><tr><th scope="row"><span class="sw g-b50" aria-hidden="true"></span>Bottom 50%</th><td>50%</td><td>13.5%</td><td class="col-63">19.0%</td></tr><tr><th scope="row"><span class="sw g-m40" aria-hidden="true"></span>Middle 40%</th><td>40%</td><td>39.8%</td><td class="col-63">44.5%</td></tr><tr><th scope="row"><span class="sw g-u9" aria-hidden="true"></span>Upper 9%</th><td>9%</td><td>26.0%</td><td class="col-63">23.6%</td></tr><tr><th scope="row"><span class="sw g-t09" aria-hidden="true"></span>P99–99.9</th><td>0.9%</td><td>10.8%</td><td class="col-63">8.5%</td></tr><tr><th scope="row"><span class="sw g-t009" aria-hidden="true"></span>P99.9–99.99</th><td>0.09%</td><td>5.2%</td><td class="col-63">2.9%</td></tr><tr><th scope="row"><span class="sw g-t001" aria-hidden="true"></span>Top 0.01%</th><td>0.01%</td><td>4.7%</td><td class="col-63">1.5%</td></tr></tbody>
+  </table>
+  <p class="source">Source: World Inequality Database, pre-tax national income, adults 20+, equal split between spouses.</p>
+</figure>
+<section class="prose">
+  <h2>Seeing the top</h2>
+  <p>The highest-income groups are too small to see on an ordinary chart. On the chart below, each of the four bands holds ten times fewer adults than the one before it, but every band gets the same width. That makes room to compare the top 0.1% with everyone else.</p>
+</section>
+<figure class="chart chart-pc" aria-labelledby="pc-h">
+  <figcaption>
+    <p class="chart-num">Chart 3</p>
+    <h3 id="pc-h">Income at each rank: 2023 and the 1963 shape</h3>
+    <p class="chart-sub">Pre-tax income per adult (log scale). The 1963 line shows the 1963 division scaled up to 2023's average income.</p>
+  </figcaption>
+  <div class="pc" role="img" aria-label="Line chart. Below about the 90th percentile the 1963-shape line is higher than 2023; above it the 2023 line is higher. Values in the table below.">
+    <div class="pc-bands"><span class="blab" style="left:0%"><b>Bottom 90%</b><span>P0–90</span></span><span class="blab" style="left:25%"><b>Next 9%</b><span>P90–99</span></span><span class="blab" style="left:50%"><b>Next 0.9%</b><span>P99–99.9</span></span><span class="blab" style="left:75%"><b>Top 0.1%</b><span>P99.9–100</span></span></div>
+    <div class="pc-plot">
+      <svg viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden="true">
+        <line class="grid" x1="0" x2="1000" y1="500.0" y2="500.0"/><line class="grid" x1="0" x2="1000" y1="403.7" y2="403.7"/><line class="grid" x1="0" x2="1000" y1="307.4" y2="307.4"/><line class="grid" x1="0" x2="1000" y1="211.2" y2="211.2"/><line class="grid" x1="0" x2="1000" y1="114.9" y2="114.9"/><line class="grid" x1="0" x2="1000" y1="18.6" y2="18.6"/><line class="band" x1="250" x2="250" y1="0" y2="500"/><line class="band" x1="500" x2="500" y1="0" y2="500"/><line class="band" x1="750" x2="750" y1="0" y2="500"/>
+        <path class="ln ln-base" d="M2.8,479.8 L5.6,450.7 L8.3,433.7 L11.1,421.9 L13.9,413.0 L16.7,405.9 L19.4,400.1 L22.2,395.3 L25.0,391.3 L27.8,387.9 L30.6,384.8 L33.3,382.1 L36.1,379.6 L38.9,377.2 L41.7,374.9 L44.4,372.7 L47.2,370.5 L50.0,368.4 L52.8,366.2 L55.6,364.1 L58.3,361.9 L61.1,359.8 L63.9,357.8 L66.7,355.8 L69.4,353.9 L72.2,352.1 L75.0,350.3 L77.8,348.6 L80.6,346.9 L83.3,345.4 L86.1,343.9 L88.9,342.4 L91.7,341.1 L94.4,339.8 L97.2,338.5 L100.0,337.3 L102.8,336.1 L105.6,335.0 L108.3,333.9 L111.1,332.9 L113.9,331.9 L116.7,330.9 L119.4,329.9 L122.2,329.0 L125.0,328.1 L127.8,327.3 L130.6,326.4 L133.3,325.6 L136.1,324.8 L138.9,324.0 L141.7,323.2 L144.4,322.5 L147.2,321.7 L150.0,321.0 L152.8,320.2 L155.6,319.5 L158.3,318.8 L161.1,318.0 L163.9,317.3 L166.7,316.6 L169.4,315.9 L172.2,315.2 L175.0,314.5 L177.8,313.8 L180.6,313.1 L183.3,312.4 L186.1,311.7 L188.9,311.0 L191.7,310.2 L194.4,309.5 L197.2,308.8 L200.0,308.0 L202.8,307.3 L205.6,306.5 L208.3,305.7 L211.1,304.9 L213.9,304.1 L216.7,303.3 L219.4,302.4 L222.2,301.5 L225.0,300.6 L227.8,299.6 L230.6,298.6 L233.3,297.5 L236.1,296.4 L238.9,295.2 L241.7,293.8 L244.4,292.4 L247.2,290.8 L250.0,289.1 L277.8,287.1 L305.6,284.9 L333.3,282.2 L361.1,279.1 L388.9,275.3 L416.7,270.5 L444.4,263.8 L472.2,253.4 L500.0,242.0 L527.8,235.8 L555.6,232.9 L583.3,229.6 L611.1,225.9 L638.9,221.4 L666.7,216.0 L694.4,208.9 L722.2,198.8 L750.0,188.3 L755.7,182.6 L762.1,180.1 L769.4,177.1 L777.7,173.7 L787.6,169.7 L799.7,164.6 L815.4,158.0 L837.4,148.0 L875.0,137.4 L880.7,131.6 L887.1,128.9 L894.4,125.9 L902.7,122.4 L912.6,118.3 L924.7,113.1 L940.4,106.3 L962.4,96.3 L1000.0,65.1"/>
+        <path class="ln ln-now" d="M5.6,493.7 L8.3,474.9 L11.1,460.6 L13.9,448.8 L16.7,438.6 L19.4,429.6 L22.2,421.5 L25.0,414.1 L27.8,407.6 L30.6,401.7 L33.3,396.5 L36.1,391.9 L38.9,387.9 L41.7,384.4 L44.4,381.4 L47.2,378.9 L50.0,376.7 L52.8,374.8 L55.6,373.3 L58.3,371.9 L61.1,370.7 L63.9,369.5 L66.7,368.4 L69.4,367.3 L72.2,366.2 L75.0,365.0 L77.8,363.7 L80.6,362.4 L83.3,361.0 L86.1,359.6 L88.9,358.1 L91.7,356.7 L94.4,355.2 L97.2,353.8 L100.0,352.4 L102.8,351.1 L105.6,349.9 L108.3,348.7 L111.1,347.5 L113.9,346.4 L116.7,345.3 L119.4,344.2 L122.2,343.2 L125.0,342.1 L127.8,341.1 L130.6,340.0 L133.3,339.0 L136.1,337.9 L138.9,336.8 L141.7,335.7 L144.4,334.6 L147.2,333.5 L150.0,332.5 L152.8,331.4 L155.6,330.3 L158.3,329.2 L161.1,328.1 L163.9,327.1 L166.7,326.0 L169.4,325.0 L172.2,323.9 L175.0,322.9 L177.8,321.9 L180.6,320.8 L183.3,319.8 L186.1,318.8 L188.9,317.7 L191.7,316.7 L194.4,315.6 L197.2,314.5 L200.0,313.4 L202.8,312.3 L205.6,311.2 L208.3,310.0 L211.1,308.9 L213.9,307.7 L216.7,306.4 L219.4,305.2 L222.2,303.8 L225.0,302.5 L227.8,301.1 L230.6,299.6 L233.3,298.1 L236.1,296.5 L238.9,294.8 L241.7,293.0 L244.4,291.1 L247.2,289.1 L250.0,286.9 L277.8,284.5 L305.6,281.9 L333.3,278.9 L361.1,275.4 L388.9,271.3 L416.7,266.2 L444.4,259.2 L472.2,248.3 L500.0,236.4 L527.8,229.6 L555.6,226.4 L583.3,222.7 L611.1,218.4 L638.9,213.2 L666.7,206.7 L694.4,198.0 L722.2,185.1 L750.0,171.6 L755.7,164.3 L762.1,160.9 L769.4,157.0 L777.7,152.6 L787.6,147.2 L799.7,140.7 L815.4,132.0 L837.4,119.2 L875.0,105.8 L880.7,98.6 L887.1,95.2 L894.4,91.4 L902.7,87.0 L912.6,81.7 L924.7,75.2 L940.4,66.6 L962.4,53.9 L1000.0,9.3"/>
+        <line class="you-link" x1="159.4" x2="159.4" y1="328.8" y2="318.5"/>
+      </svg>
+      <span class="ylab" style="top:100.00%">$1k</span><span class="ylab" style="top:80.74%">$10k</span><span class="ylab" style="top:61.49%">$100k</span><span class="ylab" style="top:42.23%">$1M</span><span class="ylab" style="top:22.98%">$10M</span><span class="ylab" style="top:3.72%">$100M</span>
+      <span class="dot dot-now" style="left:15.94%;top:65.76%"></span>
+      <span class="dot dot-base" style="left:15.94%;top:63.70%"></span>
+      <span class="you-label" style="left:15.94%;top:65.76%">You: $60,000<br><span>1963 shape: $76,800</span></span>
+      <span class="line-label lab-base" style="left:78.76%;top:33.93%">1963 shape</span>
+      <span class="line-label lab-now" style="left:78.76%;top:29.45%">2023</span>
+    </div>
+  </div>
+  <details class="table-toggle">
+    <summary>Show as a table</summary>
+    <table>
+      <thead><tr><th scope="col">Rank</th><th scope="col">2023</th><th scope="col">1963 shape, 2023 size</th></tr></thead>
+      <tbody><tr><th scope="row">P10</th><td>$9,100</td><td>$14,600</td></tr><tr><th scope="row">P25</th><td>$23,900</td><td>$32,900</td></tr><tr><th scope="row">P50</th><td>$49,500</td><td>$67,300</td></tr><tr><th scope="row">P75</th><td>$94,000</td><td>$104,200</td></tr><tr><th scope="row">P90</th><td>$163,400</td><td>$155,100</td></tr><tr><th scope="row">P99</th><td>$547,500</td><td>$477,800</td></tr><tr><th scope="row">P99.9</th><td>$2.6 million</td><td>$1.7 million</td></tr><tr><th scope="row">P99.99</th><td>$12.4 million</td><td>$5.8 million</td></tr></tbody>
+    </table>
+  </details>
+  <p class="source">Each band holds ten times fewer adults than the one before. The last band uses a log stretch and ends at P99.999, the highest threshold in the data.</p>
+</figure>
+<section class="cta">
+  <h2>Find your number</h2>
+  <p>Enter your income to see your rank, and what someone at that rank would receive under another year, a preset, or a division you design.</p>
+  <a class="button" href="#">Find your number</a>
+</section>
+</main>
+<footer class="site-foot">
+  <p><strong>Calculate America</strong> &middot; Fair Share. Design mockup, not for publication. Numbers from <code>public/data/us-ptinc.json</code>; see NUMBERS.md.</p>
+</footer>
+<script>
+(function(){var b=document.querySelector('.theme-toggle'),r=document.documentElement,m=['auto','light','dark'],i=0;
+b.addEventListener('click',function(){i=(i+1)%3;if(m[i]==='auto'){r.removeAttribute('data-theme');}else{r.setAttribute('data-theme',m[i]);}
+b.textContent='Theme: '+m[i];b.setAttribute('aria-label','Color theme: '+(m[i]==='auto'?'follow system':m[i]));});})();
+</script>
+</body>
+</html>
