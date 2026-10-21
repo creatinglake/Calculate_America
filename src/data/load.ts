@@ -85,6 +85,22 @@ export interface DfaWealth {
   shares: Record<'b50' | 'm40' | 'u9' | 't09' | 'top01', number[]>;
 }
 
+export interface Manifest {
+  sources: {
+    id: string; title: string; url: string; used_for: string; license: string; citation: string;
+    files: { file: string; url: string; bytes: number; sha256: string; retrieved: string; last_modified: string | null }[];
+  }[];
+}
+
+export interface CpsPanel {
+  meta: Record<string, string>;
+  years: {
+    surveyYear: number; incomeYear: number; records: number; weightedPersonsWithIncome: number; maxIncome: number;
+    cpsTop1Share: number; cpsTop01Share: number; widTop1Share: number; widTop01Share: number;
+  }[];
+  spreadsheetExample: { income: number; percentile: number; meanRatio: number; result: number };
+}
+
 export interface DataFiles {
   'us-ptinc': DataFile;
   'us-cainc': DataFile;
@@ -96,6 +112,8 @@ export interface DataFiles {
   'us-tax-brackets': TaxBrackets;
   'us-hweal': DataFile;
   'us-dfa-wealth': DfaWealth;
+  manifest: Manifest;
+  'cps-panel': CpsPanel;
 }
 
 const cache = new Map<string, Promise<unknown>>();
