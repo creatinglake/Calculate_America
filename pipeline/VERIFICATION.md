@@ -112,3 +112,8 @@ Status: **OK** verified · **PARTIAL** checked but something is still open · **
 
 ## V14. Latest `hweal` year — OK
 - `shwealj992` 2024 is identical to 2023 in all 127 bins (same carry-forward as V3). Latest estimated wealth year: 2023, matching income.
+
+## V15. NIPA compensation-to-wages factor — OK
+- Source: BEA NIPA bulk file https://apps.bea.gov/national/Release/TXT/NipaDataA.txt (Last-Modified 30 Sep 2026, retrieved 2026-10-21). Series located via `SeriesRegister.txt`: Table 1.12 line 1 `A032RC` national income, line 2 `A033RC` compensation of employees, line 3 `A034RC` wages and salaries.
+- Ratio `A033RC / A034RC`: 1963 1.113, 1980 1.181, 2000 1.212, 2019 1.227, **2023 1.213**, 2024 1.212, 2025 1.210. Plan said "around 1.2": confirmed.
+- The engine uses the ratio for the "today" year (2023), stored in `us-macro.json` with the full 1962–2025 series and national income.
