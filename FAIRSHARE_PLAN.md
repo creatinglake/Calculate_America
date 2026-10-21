@@ -84,6 +84,7 @@ Two research teams disagree on how much the top share has grown. PSZ find the to
 - AS rank individuals with income split within the tax unit. That is close to, not identical to, `992j`. Say so on the methods page.
 - Implementation: AS doesn't publish 127 bins. Build an "AS-adjusted" distribution per year by taking the PSZ bins and rescaling each of the six groups so group shares match AS. After rescaling, re-solve bin thresholds so the quantile function stays continuous at group edges. If the monotonicity check fails for a year, disable the AS switch for that year. Label it "PSZ shape, rescaled to Auten-Splinter group shares."
 - Where AS has no value for a group or year, the switch is disabled for that view with a note. Do not extrapolate.
+- **Decision (2026-10-21):** uniform per-group scaling broke monotonicity in 49 of 61 years, so the rescaling factor is instead piecewise-linear in rank, continuous at group edges, and solved so every group matches AS exactly (pipeline/VERIFICATION.md V12). AS groups are built on all individuals ranked by size-adjusted tax-unit income (V11). The AS switch is pre-tax only.
 
 ### 3.3 Wealth
 

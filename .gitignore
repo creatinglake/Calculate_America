@@ -31,3 +31,13 @@ __pycache__/
 # Playwright
 test-results/
 playwright-report/
+
+# Source files Adam provides. Never commit: the CPS spreadsheet holds IPUMS
+# microdata, which IPUMS terms don't allow redistributing. Copies live in
+# pipeline/raw/inputs/ (also ignored).
+/*.xlsx
+/*.xls
+/*.ppt
+/*.pptx
+/*.pdf
+/*.csv
